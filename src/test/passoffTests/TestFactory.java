@@ -15,8 +15,7 @@ public class TestFactory {
     }
 
     public static ChessGame getNewGame() {
-        // FIXME
-        return null;
+        return new BenChessGame();
     }
 
     public static ChessPiece getNewPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {

@@ -27,14 +27,29 @@ public class BenChessPiece implements ChessPiece {
     }
 
     public char toChar() {
-        return switch (this.pieceType) {
+        char res = switch (this.pieceType) {
             case KING -> 'K';
             case QUEEN -> 'Q';
             case BISHOP -> 'B';
             case KNIGHT -> 'H';
             case ROOK -> 'R';
-            case PAWN -> 'p';
+            case PAWN -> 'P';
         };
+
+        return this.color == ChessGame.TeamColor.BLACK ? Character.toLowerCase(res) : res;
+    }
+
+    public String toString() {
+        String name = switch (this.pieceType) {
+            case KING -> "King";
+            case QUEEN -> "Queen";
+            case BISHOP -> "Bishop";
+            case KNIGHT -> "Knight";
+            case ROOK -> "Rook";
+            case PAWN -> "Pawn";
+        };
+
+        return color + " " + name;
     }
 
     private ArrayList<ChessPosition> returnValidPositions(ChessBoard board, int currentRow, int currentCol, ArrayList<int[]> moves, boolean isPawn) {
@@ -90,7 +105,6 @@ public class BenChessPiece implements ChessPiece {
 
             ChessPiece pieceThere = board.getPiece(newPosition);
             if (pieceThere == null) {
-                System.out.println("null at " + newPosition);
                 moves.add(new int[]{i * xDirection, i * yDirection});
             } else if (pieceThere.getTeamColor() == this.color) {
                 break;

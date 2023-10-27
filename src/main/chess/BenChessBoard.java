@@ -48,8 +48,22 @@ public class BenChessBoard implements ChessBoard {
 
     public BenChessBoard() {
         this.board = new ChessPiece[8][8];
+    }
 
-//        initializeBoard();
+    public ChessBoard returnClone() {
+        ChessBoard newBoard = new BenChessBoard();
+
+
+        for (int row = 1; row < 9; row++) {
+            for (int col = 1; col < 9; col++) {
+
+                ChessPosition pos = new BenChessPosition(row, col);
+
+                newBoard.addPiece(pos, this.getPiece(pos));
+            }
+        }
+
+        return newBoard;
     }
 
     @Override

@@ -1,30 +1,17 @@
 package models;
 
 import chess.ChessGame;
+import dataAccess.DataAccessException;
 
 /**
  * Multiplayer game
  */
 public class Game {
-    /**
-     * Game ID
-     */
-    final int gameID;
-    /**
-     * Username of player playing White
-     */
-    final String whiteUsername;
-    /**
-     * Username of player playing Black
-     */
-    final String blackUsername;
-    /**
-     * Match name
-     */
+
+    final String gameID;
+    String whiteUsername;
+    String blackUsername;
     final String gameName;
-    /**
-     * The game itself
-     */
     final ChessGame game;
 
     /**
@@ -36,11 +23,25 @@ public class Game {
      * @param gameName      match name
      * @param game          game state
      */
-    public Game(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
+    public Game(String gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
         this.gameID = gameID;
         this.whiteUsername = whiteUsername;
         this.blackUsername = blackUsername;
         this.gameName = gameName;
         this.game = game;
+    }
+
+    public String getID() {
+        return gameID;
+    }
+
+    public void claimSpot(String username) throws DataAccessException {
+        if (whiteUsername == null) {
+            whiteUsername = username;
+        } else if (blackUsername == null) {
+            blackUsername = username;
+        } else {
+            throw new DataAccessException("No spots available");
+        }
     }
 }

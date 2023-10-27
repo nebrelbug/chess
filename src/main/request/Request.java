@@ -5,37 +5,14 @@ package request;
  */
 public class Request {
 
-    /**
-     * Possible Request methods: GET, POST, PUT, DELETE, or OPTIONS
-     */
-    public static enum RequestMethod {
-        GET,
-        POST,
-        PUT,
-        DELETE,
-        OPTIONS
-    }
+    public final String username;
+    public final String password;
+    public final String email;
 
-    /**
-     * Method of the request
-     */
-    final RequestMethod method;
-
-    /**
-     * Path request will be sent to
-     */
-    final String path;
-
-
-    /**
-     * Instantiates a new Request.
-     *
-     * @param method method
-     * @param path   path
-     */
-    public Request(RequestMethod method, String path) {
-        this.method = method;
-        this.path = path;
+    public Request(String username, String password, String email) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
     }
 
 }

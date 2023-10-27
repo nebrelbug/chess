@@ -1,6 +1,8 @@
 import spark.*;
 import com.google.gson.Gson;
 
+import handlers.*;
+
 import java.util.*;
 
 public class Server {
@@ -18,11 +20,11 @@ public class Server {
         // Register a directory for hosting static files
         Spark.externalStaticFileLocation("web");
 
-        Spark.delete("/db", this::dbDelete);
+        Spark.delete("/db", ClearDbHandler::handleRequest);
 
         Spark.post("/user", this::dbDelete);
 
-        Spark.post("/session", this::dbDelete);
+        Spark.post("/session", AuthHandler::handleLoginRequest);
 
         Spark.delete("/session", this::dbDelete);
 

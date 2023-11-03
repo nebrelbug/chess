@@ -2,6 +2,8 @@ package handlers;
 
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
+import response.ErrorResponse;
+import response.Stringifier;
 import services.ClearDbService;
 import spark.Request;
 import spark.Response;
@@ -15,11 +17,11 @@ public class ClearDbHandler {
         try {
             ClearDbService.clear();
             result.status(200);
+            return Stringifier.jsonify(new Object());
         } catch (Exception e) {
             result.status(500);
         }
 
-
-        return new Gson().toJson(new Object());
+        return Stringifier.jsonify(new ErrorResponse("Error: description"));
     }
 }

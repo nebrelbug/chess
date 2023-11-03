@@ -1,0 +1,51 @@
+package passoffTests.serviceTests;
+
+import dataAccess.DataAccessException;
+import dataAccess.GameDAO;
+import dataAccess.UserDAO;
+import models.AuthToken;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import services.ClearDbService;
+import services.CreateGameService;
+import services.RegisterService;
+
+
+public class CreateGameServiceTest {
+
+    static String username = "Create Game";
+    static String password = "password";
+    static String email = "test@example.com";
+
+    static AuthToken auth;
+
+    @BeforeAll
+    public static void before() throws DataAccessException {
+        ClearDbService.clear();
+        auth = RegisterService.register(username, password, email);
+    }
+
+    @Test
+    public void positiveTest() throws DataAccessException {
+
+        int gameID = CreateGameService.create(auth.authToken(), "New Game");
+
+        GameDAO.findById(gameID);
+
+        Assertions.assertEquals(gameID, 1);
+
+        int gameID2 = CreateGameService.create(auth.authToken(), "New Game");
+
+        Assertions.assertEquals(gameID2, 2);
+    }
+
+    @Test
+    public void negativeTest() {
+
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            CreateGameService.create("invalid token", "New Game");
+        });
+    }
+
+}

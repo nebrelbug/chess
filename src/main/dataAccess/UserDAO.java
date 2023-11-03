@@ -3,7 +3,6 @@ package dataAccess;
 import models.User;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class UserDAO {
 
@@ -15,12 +14,21 @@ public class UserDAO {
 
     public static User getByUsername(String username) throws DataAccessException {
         for (User user : users) {
-            if (user.getUsername().equals(username)) {
+            if (user.username().equals(username)) {
                 return user;
             }
         }
 
-        throw new DataAccessException("Username not found");
+        throw new DataAccessException(401, "unauthorized");
+    }
+
+    public static boolean usernameExists(String username) {
+        for (User user : users) {
+            if (user.username().equals(username)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static User[] getByUsernames(String[] usernames) throws DataAccessException {
@@ -38,7 +46,7 @@ public class UserDAO {
 
         boolean userRemoved = users.remove(user);
 
-        if (!userRemoved) throw new DataAccessException("Game ID not found");
+        if (!userRemoved) throw new DataAccessException(500, "User not found");
     }
 
     public static void clear() {

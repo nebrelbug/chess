@@ -7,24 +7,28 @@ import models.AuthToken;
 import models.User;
 
 /**
- * Service to handle logging in
+ * Service to handle logging in and logging out
  */
 public class AuthService {
 
     public static AuthToken login(String username, String password) throws DataAccessException {
 
+        if (username == null || password == null) throw new DataAccessException(400, "bad request");
+
         User user = UserDAO.getByUsername(username);
 
-        if (user.getPassword().equals(password)) {
-            AuthToken newAuthToken = AuthDAO.generate(username);
+        if (user.password().equals(password)) {
 
-            return newAuthToken;
+            return AuthDAO.generate(username);
         }
 
-        throw new DataAccessException("Error: unauthorized");
+        throw new DataAccessException(401, "unauthorized");
     }
 
-    public static void logout(AuthToken auth) throws DataAccessException {
-        AuthDAO.remove(auth);
+    public static void logout(String tokenString) throws DataAccessException {
+
+        AuthToken token = AuthDAO.getByTokenString(tokenString);
+
+        AuthDAO.remove(token);
     }
 }

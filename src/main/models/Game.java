@@ -8,7 +8,7 @@ import dataAccess.DataAccessException;
  */
 public class Game {
 
-    final String gameID;
+    final int gameID;
     String whiteUsername;
     String blackUsername;
     final String gameName;
@@ -23,7 +23,7 @@ public class Game {
      * @param gameName      match name
      * @param game          game state
      */
-    public Game(String gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
+    public Game(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
         this.gameID = gameID;
         this.whiteUsername = whiteUsername;
         this.blackUsername = blackUsername;
@@ -31,17 +31,17 @@ public class Game {
         this.game = game;
     }
 
-    public String getID() {
+    public int getID() {
         return gameID;
     }
 
-    public void claimSpot(String username) throws DataAccessException {
-        if (whiteUsername == null) {
+    public void claimSpot(String username, String color) throws DataAccessException {
+        if (color.equals("WHITE") && whiteUsername == null) {
             whiteUsername = username;
-        } else if (blackUsername == null) {
+        } else if (color.equals("BLACK") && blackUsername == null) {
             blackUsername = username;
         } else {
-            throw new DataAccessException("No spots available");
+            throw new DataAccessException(403, "No spots available");
         }
     }
 }

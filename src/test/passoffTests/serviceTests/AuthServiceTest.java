@@ -21,13 +21,13 @@ public class AuthServiceTest {
     @BeforeAll
     public static void before() throws DataAccessException {
         ClearDbService.clear();
-        auth = RegisterService.register(username, password, email);
+        auth = new RegisterService().register(username, password, email);
     }
 
     @Test
     public void loginPositiveTest() throws DataAccessException {
 
-        AuthToken token = AuthService.login(username, password);
+        AuthToken token = new AuthService().login(username, password);
 
         Assertions.assertEquals(token.username(), username);
     }
@@ -36,17 +36,17 @@ public class AuthServiceTest {
     public void loginNegativeTest() {
 
         Assertions.assertThrows(DataAccessException.class, () -> {
-            AuthService.login(username, "wrong");
+            new AuthService().login(username, "wrong");
         });
     }
 
     @Test
     public void logoutPositiveTest() throws DataAccessException {
 
-        AuthService.logout(auth.authToken());
+        new AuthService().logout(auth.authToken());
 
         Assertions.assertThrows(DataAccessException.class, () -> {
-            AuthDAO.getByTokenString(auth.authToken());
+            new AuthDAO().getByTokenString(auth.authToken());
         });
     }
 
@@ -55,7 +55,7 @@ public class AuthServiceTest {
     public void logoutNegativeTest() {
 
         Assertions.assertThrows(DataAccessException.class, () -> {
-            AuthService.logout("Nonexistent token");
+            new AuthService().logout("Nonexistent token");
         });
 
     }

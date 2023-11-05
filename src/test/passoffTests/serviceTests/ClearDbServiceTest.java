@@ -18,14 +18,16 @@ public class ClearDbServiceTest {
     @BeforeAll
     public static void before() throws DataAccessException {
         ClearDbService.clear();
-        RegisterService.register("HGEIOHI", "HOJPPJO", "EGOIH");
-        RegisterService.register("asfdjl", "afsjkl", "asdfjkl");
+
+        var rService = new RegisterService();
+        rService.register("HGEIOHI", "HOJPPJO", "EGOIH");
+        rService.register("asfdjl", "afsjkl", "asdfjkl");
     }
 
     @Test
     public void clearTest() throws DataAccessException {
 
-        ArrayList<AuthToken> authTokens = AuthDAO.listTokens();
+        ArrayList<AuthToken> authTokens = new AuthDAO().listTokens();
 
         ClearDbService.clear();
 

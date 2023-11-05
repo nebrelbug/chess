@@ -14,7 +14,7 @@ public class CreateGameService {
 
     public static int create(String tokenString, String gameName) throws DataAccessException {
 
-        AuthDAO.getByTokenString(tokenString); // this will throw if invalid token
+        new AuthDAO().getByTokenString(tokenString); // this will throw if invalid token
 
         return GameDAO.create(gameName);
     }

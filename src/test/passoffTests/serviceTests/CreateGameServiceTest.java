@@ -23,7 +23,7 @@ public class CreateGameServiceTest {
     @BeforeAll
     public static void before() throws DataAccessException {
         ClearDbService.clear();
-        auth = RegisterService.register(username, password, email);
+        auth = new RegisterService().register(username, password, email);
     }
 
     @Test

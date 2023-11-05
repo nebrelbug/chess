@@ -20,7 +20,7 @@ public class RegisterServiceTest {
     @Test
     public void registerPositiveTest() throws DataAccessException {
 
-        AuthToken token = RegisterService.register(username, password, email);
+        AuthToken token = new RegisterService().register(username, password, email);
 
         Assertions.assertEquals(token.username(), username);
 
@@ -31,7 +31,7 @@ public class RegisterServiceTest {
     public void registerNegativeTest() {
 
         Assertions.assertThrows(DataAccessException.class, () -> {
-            RegisterService.register(username, password, email);
+            new RegisterService().register(username, password, email);
         });
     }
 

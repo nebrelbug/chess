@@ -1,30 +1,28 @@
 package handlers;
 
-import com.google.gson.Gson;
-import request.RequestParser;
 import dataAccess.DataAccessException;
-import models.AuthToken;
+import dataAccess.GameDAO;
+import models.Game;
 import response.ErrorResponse;
 import response.Stringifier;
-import services.RegisterService;
+import services.CreateGameService;
 import spark.Request;
 import spark.Response;
 
-public class RegisterHandler {
-
-    record UserInfo(String username, String password, String email) {
-    }
+public class SingleGameHandler {
 
     public static String handleRequest(Request request, Response result) {
         result.type("application/json");
 
         try {
-            UserInfo userInfo = RequestParser.parse(request.body(), UserInfo.class);
+//            String tokenString = request.headers("Authorization");
 
-            AuthToken newAuthToken = new RegisterService().register(userInfo.username, userInfo.password, userInfo.email);
+            int id = Integer.parseInt(request.params(":id"));
+
+            Game game = GameDAO.findById(id);
 
             result.status(200);
-            return Stringifier.jsonify(newAuthToken);
+            return Stringifier.jsonify(game);
 
         } catch (DataAccessException e) {
             result.status(e.code);

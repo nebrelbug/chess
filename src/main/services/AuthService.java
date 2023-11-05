@@ -11,7 +11,13 @@ import models.User;
  */
 public class AuthService {
 
-    public static AuthToken login(String username, String password) throws DataAccessException {
+    AuthDAO dao;
+
+    public AuthService() throws DataAccessException {
+        dao = new AuthDAO();
+    }
+
+    public AuthToken login(String username, String password) throws DataAccessException {
 
         if (username == null || password == null) throw new DataAccessException(400, "bad request");
 
@@ -19,16 +25,16 @@ public class AuthService {
 
         if (user.password().equals(password)) {
 
-            return AuthDAO.generate(username);
+            return dao.generate(username);
         }
 
         throw new DataAccessException(401, "unauthorized");
     }
 
-    public static void logout(String tokenString) throws DataAccessException {
+    public void logout(String tokenString) throws DataAccessException {
 
-        AuthToken token = AuthDAO.getByTokenString(tokenString);
+        AuthToken token = dao.getByTokenString(tokenString);
 
-        AuthDAO.remove(token);
+        dao.remove(token);
     }
 }

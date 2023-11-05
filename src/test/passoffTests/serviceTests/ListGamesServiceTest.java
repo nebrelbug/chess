@@ -28,7 +28,8 @@ public class ListGamesServiceTest {
     @BeforeAll
     public static void before() throws DataAccessException {
         ClearDbService.clear();
-        auth = RegisterService.register(username, password, email);
+
+        auth = new RegisterService().register(username, password, email);
 
         gameID1 = CreateGameService.create(auth.authToken(), "Game 1");
         gameID2 = CreateGameService.create(auth.authToken(), "Game 2");

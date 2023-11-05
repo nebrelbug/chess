@@ -12,7 +12,13 @@ import models.User;
  */
 public class RegisterService {
 
-    public static AuthToken register(String username, String password, String email) throws DataAccessException {
+    AuthDAO dao;
+
+    public RegisterService() throws DataAccessException {
+        dao = new AuthDAO();
+    }
+
+    public AuthToken register(String username, String password, String email) throws DataAccessException {
 
         if (username == null || password == null || email == null) throw new DataAccessException(400, "bad request");
 
@@ -21,7 +27,7 @@ public class RegisterService {
         User newUser = new User(username, password, email);
         UserDAO.insert(newUser);
 
-        return AuthDAO.generate(username);
+        return dao.generate(username);
     }
 
 }

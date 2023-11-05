@@ -4,6 +4,9 @@ import models.AuthToken;
 import models.User;
 
 import java.lang.reflect.Array;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -12,37 +15,88 @@ import java.util.UUID;
  */
 public class AuthDAO {
 
-    static ArrayList<AuthToken> authTokens = new ArrayList<>();
+    Connection conn;
 
-    public static AuthToken getByTokenString(String tokenString) throws DataAccessException {
-        for (AuthToken token : authTokens) {
-            if (token.authToken().equals(tokenString)) {
-                return token;
+    public AuthDAO() throws DataAccessException {
+        this.conn = new Database().getConnection();
+    }
+
+    public AuthToken getByTokenString(String tokenString) throws DataAccessException {
+
+        try (var preparedStatement = conn.prepareStatement("SELECT token, username FROM auth_tokens WHERE token=?")) {
+
+            preparedStatement.setString(1, tokenString);
+
+            try (var rs = preparedStatement.executeQuery()) {
+                if (!rs.next()) throw new DataAccessException(401, "token not found");
+
+                var token = rs.getString("token");
+                var username = rs.getString("username");
+
+                return new AuthToken(username, token);
             }
+        } catch (SQLException e) {
+            System.out.println("ERROR GETTING: " + e.toString());
+            throw new DataAccessException(500, e.toString());
+        }
+    }
+
+    public void remove(AuthToken tokenToRemove) throws DataAccessException {
+        try (var preparedStatement = conn.prepareStatement("DELETE FROM auth_tokens WHERE token=?")) {
+            preparedStatement.setString(1, tokenToRemove.authToken());
+
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new DataAccessException(500, e.toString());
+        }
+    }
+
+    public AuthToken generate(String username) throws DataAccessException {
+
+        String tokenString = UUID.randomUUID().toString();
+
+        try (var preparedStatement = conn.prepareStatement("INSERT INTO auth_tokens (token, username) VALUES(?, ?)")) {
+            preparedStatement.setString(1, tokenString);
+            preparedStatement.setString(2, username);
+
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("ERROR GENERATING: " + e.toString());
+
+            throw new DataAccessException(500, e.toString());
         }
 
-        throw new DataAccessException(401, "didn't find token string");
+        return new AuthToken(username, tokenString);
     }
 
-    public static void remove(AuthToken tokenToRemove) throws DataAccessException {
-        boolean authTokenRemoved = authTokens.remove(tokenToRemove);
+    public ArrayList<AuthToken> listTokens() throws DataAccessException {
 
-        if (!authTokenRemoved) throw new DataAccessException(500, "AuthToken not found");
+        ArrayList<AuthToken> tokens = new ArrayList<>();
+
+        try (var preparedStatement = conn.prepareStatement("SELECT token, username FROM auth_tokens")) {
+            try (var rs = preparedStatement.executeQuery()) {
+                while (rs.next()) {
+                    var token = rs.getString("token");
+                    var username = rs.getString("username");
+
+                    tokens.add(new AuthToken(username, token));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(500, e.toString());
+        }
+
+        return tokens;
     }
 
-    public static AuthToken generate(String username) {
-        AuthToken newToken = new AuthToken(username, UUID.randomUUID().toString());
+    public void clear() throws DataAccessException {
 
-        authTokens.add(newToken);
-
-        return newToken;
-    }
-
-    public static ArrayList<AuthToken> listTokens() {
-        return authTokens;
-    }
-
-    public static void clear() {
-        authTokens.clear();
+        try (var createTableStatement = conn.prepareStatement("DELETE FROM auth_tokens")) {
+            createTableStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException(500, e.toString());
+        }
     }
 }

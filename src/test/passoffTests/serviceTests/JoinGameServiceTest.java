@@ -28,12 +28,15 @@ public class JoinGameServiceTest {
     @BeforeAll
     public static void before() throws DataAccessException {
         ClearDbService.clear();
-        auth = RegisterService.register(username, password, email);
+
+        var rService = new RegisterService();
+
+        auth = rService.register(username, password, email);
         gameID = CreateGameService.create(auth.authToken(), "New Game");
 
-        auth2 = RegisterService.register(username + "1", password + "1", email + "1");
-        auth3 = RegisterService.register(username + "2", password + "2", email + "2");
-        auth4 = RegisterService.register(username + "3", password + "3", email + "3");
+        auth2 = rService.register(username + "1", password + "1", email + "1");
+        auth3 = rService.register(username + "2", password + "2", email + "2");
+        auth4 = rService.register(username + "3", password + "3", email + "3");
     }
 
     @Test

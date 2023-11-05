@@ -7,8 +7,8 @@ import dataAccess.*;
  */
 public class ClearDbService {
 
-    public static void clear() {
-        AuthDAO.clear();
+    public static void clear() throws DataAccessException {
+        new AuthDAO().clear();
         GameDAO.clear();
         UserDAO.clear();
     }

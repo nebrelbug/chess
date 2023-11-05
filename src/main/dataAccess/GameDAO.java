@@ -1,5 +1,6 @@
 package dataAccess;
 
+import chess.BenChessGame;
 import models.Game;
 
 import java.util.ArrayList;
@@ -9,13 +10,14 @@ import java.util.ArrayList;
  */
 public class GameDAO {
 
+
     static ArrayList<Game> games = new ArrayList<>();
 
     public static int create(String gameName) throws DataAccessException {
 
         int gameID = games.size() + 1;
 
-        Game game = new Game(gameID, null, null, gameName, null);
+        Game game = new Game(gameID, null, null, gameName, new BenChessGame());
 
         games.add(game);
 

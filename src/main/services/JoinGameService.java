@@ -12,7 +12,7 @@ public class JoinGameService {
 
     public static void join(String tokenString, int gameID, String playerColor) throws DataAccessException {
 
-        AuthToken token = AuthDAO.getByTokenString(tokenString); // this will throw if invalid token
+        AuthToken token = new AuthDAO().getByTokenString(tokenString); // this will throw if invalid token
 
         GameDAO.claimSpot(gameID, token.username(), playerColor);
     }

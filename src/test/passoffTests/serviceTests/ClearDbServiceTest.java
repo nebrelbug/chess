@@ -26,10 +26,9 @@ public class ClearDbServiceTest {
 
     @Test
     public void clearTest() throws DataAccessException {
+        ClearDbService.clear();
 
         ArrayList<AuthToken> authTokens = new AuthDAO().listTokens();
-
-        ClearDbService.clear();
 
         Assertions.assertEquals(0, authTokens.size());
     }

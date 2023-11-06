@@ -19,7 +19,7 @@ public class SingleGameHandler {
 
             int id = Integer.parseInt(request.params(":id"));
 
-            Game game = GameDAO.findById(id);
+            Game game = new GameDAO().findById(id);
 
             result.status(200);
             return Stringifier.jsonify(game);

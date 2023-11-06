@@ -1,5 +1,8 @@
 import chess.*;
+import dataAccess.DataAccessException;
+import dataAccess.GameDAO;
 import org.junit.jupiter.api.Assertions;
+import response.Stringifier;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -8,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Main {
-    public static void main(String[] args) throws InvalidMoveException {
+    public static void main(String[] args) throws InvalidMoveException, DataAccessException {
         BenChessBoard board = new BenChessBoard();
         ChessGame game = new BenChessGame();
 
@@ -23,11 +26,15 @@ public class Main {
 
         System.out.println(board);
 
-        game.makeMove(new BenChessMove(new BenChessPosition(4, 4), new BenChessPosition(3, 4), null));
+//        game.makeMove(new BenChessMove(new BenChessPosition(4, 4), new BenChessPosition(3, 4), null));
 
         System.out.println(game.isInCheckmate(ChessGame.TeamColor.BLACK));
 
 //        System.out.println(board);
+
+        var dao = new GameDAO();
+
+        dao.updateGame(3, Stringifier.jsonify(game));
 
     }
 }

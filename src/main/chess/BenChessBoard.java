@@ -110,4 +110,14 @@ public class BenChessBoard implements ChessBoard {
         }
         return sb.toString();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return toString().equals(o.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(board);
+    }
 }

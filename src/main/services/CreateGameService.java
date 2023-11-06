@@ -16,7 +16,7 @@ public class CreateGameService {
 
         new AuthDAO().getByTokenString(tokenString); // this will throw if invalid token
 
-        return GameDAO.create(gameName);
+        return new GameDAO().create(gameName);
     }
 
 }

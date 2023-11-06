@@ -12,22 +12,23 @@ import models.User;
  */
 public class RegisterService {
 
-    AuthDAO dao;
+    AuthDAO authDao;
+    UserDAO userDAO;
 
     public RegisterService() throws DataAccessException {
-        dao = new AuthDAO();
+        authDao = new AuthDAO();
+        userDAO = new UserDAO();
     }
 
     public AuthToken register(String username, String password, String email) throws DataAccessException {
 
         if (username == null || password == null || email == null) throw new DataAccessException(400, "bad request");
 
-        if (UserDAO.usernameExists(username)) throw new DataAccessException(403, "already taken");
-
+        if (userDAO.usernameExists(username)) throw new DataAccessException(403, "already taken");
         User newUser = new User(username, password, email);
-        UserDAO.insert(newUser);
+        userDAO.insert(newUser);
 
-        return dao.generate(username);
+        return authDao.generate(username);
     }
 
 }

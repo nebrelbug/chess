@@ -40,7 +40,7 @@ public class ListGamesServiceTest {
         ArrayList<Game> games = ListGamesService.listGames(auth.authToken());
 
         Assertions.assertEquals(games.size(), 2);
-        Assertions.assertEquals(games.get(0).getID(), gameID1);
+        Assertions.assertEquals(games.get(0).gameID(), gameID1);
     }
 
     @Test

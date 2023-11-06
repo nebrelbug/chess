@@ -6,7 +6,7 @@ public class Server {
     public static void main(String[] args) throws Exception {
 
         new DatabaseInit().initialize();
-
+        
         new Server().run();
 
     }
@@ -14,6 +14,7 @@ public class Server {
     private void run() throws DataAccessException {
 
         var authHandler = new AuthHandler();
+        var registerHandler = new RegisterHandler();
 
 
         // Specify the port you want the server to listen on
@@ -24,7 +25,7 @@ public class Server {
 
         Spark.delete("/db", ClearDbHandler::handleRequest);
 
-        Spark.post("/user", RegisterHandler::handleRequest);
+        Spark.post("/user", registerHandler::handleRequest);
 
         Spark.post("/session", authHandler::handleLoginRequest);
 

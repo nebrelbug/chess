@@ -12,8 +12,14 @@ public class JoinGameService {
 
     public static void join(String tokenString, int gameID, String playerColor) throws DataAccessException {
 
+        if (playerColor != null) {
+            if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK") && !playerColor.isEmpty()) {
+                throw new DataAccessException(400, "Invalid color");
+            }
+        }
+
         AuthToken token = new AuthDAO().getByTokenString(tokenString); // this will throw if invalid token
 
-        GameDAO.claimSpot(gameID, token.username(), playerColor);
+        new GameDAO().claimSpot(gameID, token.username(), playerColor);
     }
 }

@@ -9,7 +9,7 @@ public class ClearDbService {
 
     public static void clear() throws DataAccessException {
         new AuthDAO().clear();
-        GameDAO.clear();
-        UserDAO.clear();
+        new GameDAO().clear();
+        new UserDAO().clear();
     }
 }

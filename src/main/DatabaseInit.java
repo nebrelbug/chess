@@ -14,7 +14,7 @@ public class DatabaseInit {
     }
 
     void configureDatabase() throws DataAccessException {
-        try (var conn = db.getConnection()) {
+        try (var conn = db.getRootConnection()) {
             var createDbStatement = conn.prepareStatement("CREATE DATABASE IF NOT EXISTS chess");
             createDbStatement.executeUpdate();
         } catch (SQLException e) {
@@ -30,8 +30,10 @@ public class DatabaseInit {
             var createGamesTable = """
                     CREATE TABLE IF NOT EXISTS games (
                         id INT NOT NULL AUTO_INCREMENT,
+                        white_username VARCHAR(255),
+                        black_username VARCHAR(255),
                         name VARCHAR(255) NOT NULL,
-                        boardState VARCHAR(2000) NOT NULL,
+                        board_state longtext NOT NULL,
                         PRIMARY KEY (id)
                     )""";
 

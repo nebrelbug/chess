@@ -36,7 +36,6 @@ public class AuthDAO {
                 return new AuthToken(username, token);
             }
         } catch (SQLException e) {
-            System.out.println("ERROR GETTING: " + e.toString());
             throw new DataAccessException(500, e.toString());
         }
     }
@@ -47,7 +46,7 @@ public class AuthDAO {
 
             preparedStatement.executeUpdate();
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new DataAccessException(500, e.toString());
         }
     }
@@ -63,14 +62,13 @@ public class AuthDAO {
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
-            System.out.println("ERROR GENERATING: " + e.toString());
-
             throw new DataAccessException(500, e.toString());
         }
 
         return new AuthToken(username, tokenString);
     }
 
+    // just for testing!
     public ArrayList<AuthToken> listTokens() throws DataAccessException {
 
         ArrayList<AuthToken> tokens = new ArrayList<>();

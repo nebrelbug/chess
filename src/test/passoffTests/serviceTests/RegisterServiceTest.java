@@ -24,7 +24,7 @@ public class RegisterServiceTest {
 
         Assertions.assertEquals(token.username(), username);
 
-        UserDAO.usernameExists(username);
+        new UserDAO().usernameExists(username);
     }
 
     @Test

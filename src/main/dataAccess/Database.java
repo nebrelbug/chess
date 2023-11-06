@@ -16,6 +16,8 @@ public class Database {
     private static final String DB_PASSWORD = "password";
 
     private static final String CONNECTION_URL = "jdbc:mysql://localhost:3306/" + DB_NAME;
+    private static final String ROOT_URL = "jdbc:mysql://localhost:3306";
+
 
     /**
      * Gets a connection to the database.
@@ -30,5 +32,19 @@ public class Database {
             throw new DataAccessException(500, e.getMessage());
         }
     }
-    
+
+    /**
+     * Gets a connection to the database.
+     *
+     * @return Connection the connection.
+     * @throws DataAccessException if a data access error occurs.
+     */
+    public Connection getRootConnection() throws DataAccessException {
+        try {
+            return DriverManager.getConnection(ROOT_URL, DB_USERNAME, DB_PASSWORD);
+        } catch (SQLException e) {
+            throw new DataAccessException(500, e.getMessage());
+        }
+    }
+
 }

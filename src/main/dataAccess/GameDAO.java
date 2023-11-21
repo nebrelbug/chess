@@ -1,11 +1,8 @@
 package dataAccess;
 
-import chess.BenChessBoard;
 import chess.BenChessGame;
-import chess.ChessGame;
-import models.AuthToken;
 import models.Game;
-import models.User;
+import request.RequestException;
 import request.RequestParser;
 import response.Stringifier;
 
@@ -71,6 +68,8 @@ public class GameDAO {
             }
         } catch (SQLException e) {
             throw new DataAccessException(500, e.toString());
+        } catch (RequestException e) {
+            throw new DataAccessException(400, e.getMessage());
         }
     }
 
@@ -145,6 +144,8 @@ public class GameDAO {
             }
         } catch (SQLException e) {
             throw new DataAccessException(500, e.toString());
+        } catch (RequestException e) {
+            throw new DataAccessException(400, e.getMessage());
         }
 
         return games;

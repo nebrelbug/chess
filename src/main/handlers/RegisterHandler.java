@@ -1,12 +1,11 @@
 package handlers;
 
-import com.google.gson.Gson;
+import request.RequestException;
 import request.RequestParser;
 import dataAccess.DataAccessException;
 import models.AuthToken;
 import response.ErrorResponse;
 import response.Stringifier;
-import services.AuthService;
 import services.RegisterService;
 import spark.Request;
 import spark.Response;
@@ -35,6 +34,10 @@ public class RegisterHandler {
 
         } catch (DataAccessException e) {
             result.status(e.code);
+
+            return Stringifier.jsonify(new ErrorResponse(e.getMessage()));
+        } catch (RequestException e) {
+            result.status(400);
 
             return Stringifier.jsonify(new ErrorResponse(e.getMessage()));
         }

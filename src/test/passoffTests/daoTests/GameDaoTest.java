@@ -4,11 +4,9 @@ import chess.*;
 import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
 import models.Game;
-import models.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import request.RequestParser;
 import response.Stringifier;
 
 

@@ -1,11 +1,8 @@
 package dataAccess;
 
 import models.AuthToken;
-import models.User;
 
-import java.lang.reflect.Array;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;

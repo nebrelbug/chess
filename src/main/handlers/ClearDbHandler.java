@@ -1,7 +1,5 @@
 package handlers;
 
-import com.google.gson.Gson;
-import dataAccess.DataAccessException;
 import response.ErrorResponse;
 import response.Stringifier;
 import services.ClearDbService;

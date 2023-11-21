@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static chess.ChessGame.TeamColor.WHITE;
-import static chess.ChessGame.TeamColor.BLACK;
 
 public class BenChessGame implements ChessGame {
 
@@ -28,7 +27,7 @@ public class BenChessGame implements ChessGame {
 
     private Collection<ChessMove> _validMoves(ChessPosition startPosition, ChessBoard testBoard) {
         ChessPiece pieceThere = testBoard.getPiece(startPosition);
-        
+
         return pieceThere.pieceMoves(testBoard, startPosition);
     }
 

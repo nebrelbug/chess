@@ -1,13 +1,10 @@
 package passoffTests.serviceTests;
 
-import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
 import models.AuthToken;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import services.AuthService;
 import services.RegisterService;
 
 

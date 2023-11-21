@@ -1,7 +1,6 @@
 package handlers;
 
 import dataAccess.DataAccessException;
-import models.AuthToken;
 import models.Game;
 import response.ErrorResponse;
 import response.Stringifier;

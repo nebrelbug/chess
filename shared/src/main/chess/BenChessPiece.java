@@ -1,10 +1,8 @@
 package chess;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ArrayList;
-import java.util.List;
 
 public class BenChessPiece implements ChessPiece {
 
@@ -26,6 +24,7 @@ public class BenChessPiece implements ChessPiece {
         return pieceType;
     }
 
+    @Override
     public char toChar() {
         char res = switch (this.pieceType) {
             case KING -> 'K';

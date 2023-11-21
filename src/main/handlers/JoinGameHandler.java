@@ -1,10 +1,10 @@
 package handlers;
 
 import dataAccess.DataAccessException;
+import request.RequestException;
 import request.RequestParser;
 import response.ErrorResponse;
 import response.Stringifier;
-import services.CreateGameService;
 import services.JoinGameService;
 import spark.Request;
 import spark.Response;
@@ -28,6 +28,10 @@ public class JoinGameHandler {
 
         } catch (DataAccessException e) {
             result.status(e.code);
+
+            return Stringifier.jsonify(new ErrorResponse(e.getMessage()));
+        } catch (RequestException e) {
+            result.status(400);
 
             return Stringifier.jsonify(new ErrorResponse(e.getMessage()));
         }

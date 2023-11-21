@@ -1,16 +1,13 @@
 package handlers;
 
 import dataAccess.DataAccessException;
-import models.Game;
+import request.RequestException;
 import request.RequestParser;
 import response.ErrorResponse;
 import response.Stringifier;
 import services.CreateGameService;
-import services.ListGamesService;
 import spark.Request;
 import spark.Response;
-
-import java.util.ArrayList;
 
 public class CreateGameHandler {
 
@@ -34,6 +31,10 @@ public class CreateGameHandler {
 
         } catch (DataAccessException e) {
             result.status(e.code);
+
+            return Stringifier.jsonify(new ErrorResponse(e.getMessage()));
+        } catch (RequestException e) {
+            result.status(400);
 
             return Stringifier.jsonify(new ErrorResponse(e.getMessage()));
         }

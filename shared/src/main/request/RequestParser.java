@@ -1,11 +1,9 @@
 package request;
 
 import chess.BenChessPiece;
-import chess.ChessBoard;
 import chess.ChessPiece;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dataAccess.DataAccessException;
 
 /**
  * HTTP Request
@@ -20,12 +18,12 @@ public class RequestParser {
 
     static Gson gson = builder.create();
 
-    public static <T> T parse(String json, Class<T> classOfT) throws DataAccessException {
+    public static <T> T parse(String json, Class<T> classOfT) throws RequestException {
         try {
             return gson.fromJson(json, classOfT);
         } catch (Exception e) {
             System.out.println(e);
-            throw new DataAccessException(400, "bad request");
+            throw new RequestException("bad request");
         }
     }
 }

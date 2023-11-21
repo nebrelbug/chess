@@ -1,5 +1,6 @@
 package dataAccess;
 
+import exceptions.ResponseException;
 import models.AuthToken;
 
 import java.sql.Connection;
@@ -14,18 +15,18 @@ public class AuthDAO {
 
     Connection conn;
 
-    public AuthDAO() throws DataAccessException {
+    public AuthDAO() throws ResponseException {
         this.conn = new Database().getConnection();
     }
 
-    public AuthToken getByTokenString(String tokenString) throws DataAccessException {
+    public AuthToken getByTokenString(String tokenString) throws ResponseException {
 
         try (var preparedStatement = conn.prepareStatement("SELECT token, username FROM auth_tokens WHERE token=?")) {
 
             preparedStatement.setString(1, tokenString);
 
             try (var rs = preparedStatement.executeQuery()) {
-                if (!rs.next()) throw new DataAccessException(401, "token not found");
+                if (!rs.next()) throw new ResponseException(401, "token not found");
 
                 var token = rs.getString("token");
                 var username = rs.getString("username");
@@ -33,22 +34,22 @@ public class AuthDAO {
                 return new AuthToken(username, token);
             }
         } catch (SQLException e) {
-            throw new DataAccessException(500, e.toString());
+            throw new ResponseException(500, e.toString());
         }
     }
 
-    public void remove(AuthToken tokenToRemove) throws DataAccessException {
+    public void remove(AuthToken tokenToRemove) throws ResponseException {
         try (var preparedStatement = conn.prepareStatement("DELETE FROM auth_tokens WHERE token=?")) {
             preparedStatement.setString(1, tokenToRemove.authToken());
 
             preparedStatement.executeUpdate();
 
         } catch (Exception e) {
-            throw new DataAccessException(500, e.toString());
+            throw new ResponseException(500, e.toString());
         }
     }
 
-    public AuthToken generate(String username) throws DataAccessException {
+    public AuthToken generate(String username) throws ResponseException {
 
         String tokenString = UUID.randomUUID().toString();
 
@@ -59,14 +60,14 @@ public class AuthDAO {
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
-            throw new DataAccessException(500, e.toString());
+            throw new ResponseException(500, e.toString());
         }
 
         return new AuthToken(username, tokenString);
     }
 
     // just for testing!
-    public ArrayList<AuthToken> listTokens() throws DataAccessException {
+    public ArrayList<AuthToken> listTokens() throws ResponseException {
 
         ArrayList<AuthToken> tokens = new ArrayList<>();
 
@@ -80,18 +81,18 @@ public class AuthDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(500, e.toString());
+            throw new ResponseException(500, e.toString());
         }
 
         return tokens;
     }
 
-    public void clear() throws DataAccessException {
+    public void clear() throws ResponseException {
 
         try (var createTableStatement = conn.prepareStatement("DELETE FROM auth_tokens")) {
             createTableStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException(500, e.toString());
+            throw new ResponseException(500, e.toString());
         }
     }
 }

@@ -1,5 +1,6 @@
 import dataAccess.DataAccessException;
 import dataAccess.Database;
+import exceptions.ResponseException;
 
 import java.sql.SQLException;
 
@@ -11,16 +12,16 @@ public class DatabaseInit {
         this.db = new Database();
     }
 
-    void configureDatabase() throws DataAccessException {
+    void configureDatabase() throws ResponseException {
         try (var conn = db.getRootConnection()) {
             var createDbStatement = conn.prepareStatement("CREATE DATABASE IF NOT EXISTS chess");
             createDbStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException(500, e.toString());
+            throw new ResponseException(500, e.toString());
         }
     }
 
-    void configureGamesTable() throws DataAccessException {
+    void configureGamesTable() throws ResponseException {
         try (var conn = db.getConnection()) {
 
             conn.setCatalog("chess");
@@ -39,14 +40,14 @@ public class DatabaseInit {
             try (var createTableStatement = conn.prepareStatement(createGamesTable)) {
                 createTableStatement.executeUpdate();
             } catch (SQLException e) {
-                throw new DataAccessException(500, e.toString());
+                throw new ResponseException(500, e.toString());
             }
         } catch (SQLException e) {
-            throw new DataAccessException(500, e.toString());
+            throw new ResponseException(500, e.toString());
         }
     }
 
-    void configureAuthTokensTable() throws DataAccessException {
+    void configureAuthTokensTable() throws ResponseException {
         try (var conn = db.getConnection()) {
 
             conn.setCatalog("chess");
@@ -63,14 +64,14 @@ public class DatabaseInit {
             try (var createTableStatement = conn.prepareStatement(createAuthTokensTable)) {
                 createTableStatement.executeUpdate();
             } catch (SQLException e) {
-                throw new DataAccessException(500, e.toString());
+                throw new ResponseException(500, e.toString());
             }
         } catch (SQLException e) {
-            throw new DataAccessException(500, e.toString());
+            throw new ResponseException(500, e.toString());
         }
     }
 
-    void configureUsersTable() throws DataAccessException {
+    void configureUsersTable() throws ResponseException {
         try (var conn = db.getConnection()) {
 
             conn.setCatalog("chess");
@@ -88,14 +89,14 @@ public class DatabaseInit {
             try (var createTableStatement = conn.prepareStatement(createUsersTable)) {
                 createTableStatement.executeUpdate();
             } catch (SQLException e) {
-                throw new DataAccessException(500, e.toString());
+                throw new ResponseException(500, e.toString());
             }
         } catch (SQLException e) {
-            throw new DataAccessException(500, e.toString());
+            throw new ResponseException(500, e.toString());
         }
     }
 
-    public void initialize() throws DataAccessException {
+    public void initialize() throws ResponseException {
         configureDatabase();
         configureGamesTable();
         configureAuthTokensTable();

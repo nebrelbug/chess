@@ -1,5 +1,6 @@
 package handlers;
 
+import exceptions.ResponseException;
 import request.RequestException;
 import request.RequestParser;
 import dataAccess.DataAccessException;
@@ -14,7 +15,7 @@ public class RegisterHandler {
 
     RegisterService service;
 
-    public RegisterHandler() throws DataAccessException {
+    public RegisterHandler() throws ResponseException {
         service = new RegisterService();
     }
 
@@ -32,12 +33,8 @@ public class RegisterHandler {
             result.status(200);
             return Stringifier.jsonify(newAuthToken);
 
-        } catch (DataAccessException e) {
+        } catch (ResponseException e) {
             result.status(e.code);
-
-            return Stringifier.jsonify(new ErrorResponse(e.getMessage()));
-        } catch (RequestException e) {
-            result.status(400);
 
             return Stringifier.jsonify(new ErrorResponse(e.getMessage()));
         }

@@ -1,6 +1,7 @@
 package passoffTests.serviceTests;
 
 import dataAccess.DataAccessException;
+import exceptions.ResponseException;
 import models.AuthToken;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -25,7 +26,7 @@ public class JoinGameServiceTest {
     static AuthToken auth4;
 
     @BeforeAll
-    public static void before() throws DataAccessException {
+    public static void before() throws ResponseException {
         ClearDbService.clear();
 
         var rService = new RegisterService();
@@ -39,7 +40,7 @@ public class JoinGameServiceTest {
     }
 
     @Test
-    public void positiveTest() throws DataAccessException {
+    public void positiveTest() throws ResponseException {
         JoinGameService.join(auth2.authToken(), gameID, "WHITE");
         JoinGameService.join(auth3.authToken(), gameID, "BLACK");
     }
@@ -47,11 +48,11 @@ public class JoinGameServiceTest {
     @Test
     public void negativeTest() {
 
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             JoinGameService.join(auth3.authToken(), gameID, "BLACK");
         });
 
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             JoinGameService.join(auth4.authToken(), gameID, "BLACK");
         });
     }

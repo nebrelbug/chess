@@ -3,6 +3,7 @@ package services;
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
+import exceptions.ResponseException;
 import models.AuthToken;
 
 /**
@@ -10,11 +11,11 @@ import models.AuthToken;
  */
 public class JoinGameService {
 
-    public static void join(String tokenString, int gameID, String playerColor) throws DataAccessException {
+    public static void join(String tokenString, int gameID, String playerColor) throws ResponseException {
 
         if (playerColor != null) {
             if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK") && !playerColor.isEmpty()) {
-                throw new DataAccessException(400, "Invalid color");
+                throw new ResponseException(400, "Invalid color");
             }
         }
 

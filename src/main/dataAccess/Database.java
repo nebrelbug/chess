@@ -1,5 +1,7 @@
 package dataAccess;
 
+import exceptions.ResponseException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -21,13 +23,13 @@ public class Database {
      * Gets a connection to the database.
      *
      * @return Connection the connection.
-     * @throws DataAccessException if a data access error occurs.
+     * @throws exceptions.ResponseException if a data access error occurs.
      */
-    public Connection getConnection() throws DataAccessException {
+    public Connection getConnection() throws ResponseException {
         try {
             return DriverManager.getConnection(CONNECTION_URL, DB_USERNAME, DB_PASSWORD);
         } catch (SQLException e) {
-            throw new DataAccessException(500, e.getMessage());
+            throw new ResponseException(500, e.getMessage());
         }
     }
 
@@ -35,13 +37,13 @@ public class Database {
      * Gets a connection to the database.
      *
      * @return Connection the connection.
-     * @throws DataAccessException if a data access error occurs.
+     * @throws ResponseException if a data access error occurs.
      */
-    public Connection getRootConnection() throws DataAccessException {
+    public Connection getRootConnection() throws ResponseException {
         try {
             return DriverManager.getConnection(ROOT_URL, DB_USERNAME, DB_PASSWORD);
         } catch (SQLException e) {
-            throw new DataAccessException(500, e.getMessage());
+            throw new ResponseException(500, e.getMessage());
         }
     }
 

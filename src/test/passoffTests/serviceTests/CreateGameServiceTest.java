@@ -2,6 +2,7 @@ package passoffTests.serviceTests;
 
 import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
+import exceptions.ResponseException;
 import models.AuthToken;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,13 +21,13 @@ public class CreateGameServiceTest {
     static AuthToken auth;
 
     @BeforeAll
-    public static void before() throws DataAccessException {
+    public static void before() throws ResponseException {
         ClearDbService.clear();
         auth = new RegisterService().register(username, password, email);
     }
 
     @Test
-    public void positiveTest() throws DataAccessException {
+    public void positiveTest() throws ResponseException {
 
         int gameID = CreateGameService.create(auth.authToken(), "New Game");
 
@@ -42,7 +43,7 @@ public class CreateGameServiceTest {
     @Test
     public void negativeTest() {
 
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             CreateGameService.create("invalid token", "New Game");
         });
     }

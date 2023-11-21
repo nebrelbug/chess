@@ -2,6 +2,7 @@ package handlers;
 
 import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
+import exceptions.ResponseException;
 import models.Game;
 import response.ErrorResponse;
 import response.Stringifier;
@@ -23,7 +24,7 @@ public class SingleGameHandler {
             result.status(200);
             return Stringifier.jsonify(game);
 
-        } catch (DataAccessException e) {
+        } catch (ResponseException e) {
             result.status(e.code);
 
             return Stringifier.jsonify(new ErrorResponse(e.getMessage()));

@@ -1,10 +1,11 @@
 import chess.*;
 import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
+import exceptions.ResponseException;
 import response.Stringifier;
 
 public class Main {
-    public static void main(String[] args) throws InvalidMoveException, DataAccessException {
+    public static void main(String[] args) throws InvalidMoveException, ResponseException {
         BenChessBoard board = new BenChessBoard();
         ChessGame game = new BenChessGame();
 

@@ -1,8 +1,7 @@
 package handlers;
 
-import dataAccess.DataAccessException;
+import exceptions.ResponseException;
 import models.AuthToken;
-import request.RequestException;
 import request.RequestParser;
 import response.ErrorResponse;
 import response.Stringifier;
@@ -14,7 +13,7 @@ public class AuthHandler {
 
     AuthService service;
 
-    public AuthHandler() throws DataAccessException {
+    public AuthHandler() throws ResponseException {
         service = new AuthService();
     }
 
@@ -32,14 +31,10 @@ public class AuthHandler {
             result.status(200);
             return Stringifier.jsonify(newAuthToken);
 
-        } catch (DataAccessException e) {
+        } catch (ResponseException e) {
             result.status(e.code);
             String errorMessage = e.getMessage();
             return Stringifier.jsonify(new ErrorResponse(errorMessage));
-        } catch (RequestException e) {
-            result.status(400);
-
-            return Stringifier.jsonify(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -54,7 +49,7 @@ public class AuthHandler {
             result.status(200);
             return Stringifier.jsonify(new Object());
 
-        } catch (DataAccessException e) {
+        } catch (ResponseException e) {
             result.status(e.code);
             String errorMessage = e.getMessage();
             return Stringifier.jsonify(new ErrorResponse(errorMessage));

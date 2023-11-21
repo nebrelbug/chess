@@ -1,7 +1,7 @@
 package passoffTests.serviceTests;
 
-import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
+import exceptions.ResponseException;
 import models.AuthToken;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ public class RegisterServiceTest {
     static String email = "ben@email.com";
 
     @Test
-    public void registerPositiveTest() throws DataAccessException {
+    public void registerPositiveTest() throws ResponseException {
 
         AuthToken token = new RegisterService().register(username, password, email);
 
@@ -27,7 +27,7 @@ public class RegisterServiceTest {
     @Test
     public void registerNegativeTest() {
 
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             new RegisterService().register(username, password, email);
         });
     }

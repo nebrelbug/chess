@@ -1,8 +1,8 @@
 package dataAccess;
 
 import chess.BenChessGame;
+import exceptions.ResponseException;
 import models.Game;
-import request.RequestException;
 import request.RequestParser;
 import response.Stringifier;
 
@@ -20,11 +20,11 @@ public class GameDAO {
 
     Connection conn;
 
-    public GameDAO() throws DataAccessException {
+    public GameDAO() throws ResponseException {
         this.conn = new Database().getConnection();
     }
 
-    public int create(String gameName) throws DataAccessException {
+    public int create(String gameName) throws ResponseException {
 
         try (var preparedStatement = conn.prepareStatement("INSERT INTO games (white_username, black_username, name, board_state) VALUES(?, ?, ?, ?)", RETURN_GENERATED_KEYS)) {
             preparedStatement.setNull(1, Types.VARCHAR);
@@ -44,18 +44,18 @@ public class GameDAO {
             return ID;
 
         } catch (SQLException e) {
-            throw new DataAccessException(500, "Server error: failed to create game");
+            throw new ResponseException(500, "Server error: failed to create game");
         }
     }
 
-    public Game findById(int id) throws DataAccessException {
+    public Game findById(int id) throws ResponseException {
 
         try (var preparedStatement = conn.prepareStatement("SELECT white_username, black_username, name, board_state FROM games WHERE id=?")) {
 
             preparedStatement.setInt(1, id);
 
             try (var rs = preparedStatement.executeQuery()) {
-                if (!rs.next()) throw new DataAccessException(401, "Game not found");
+                if (!rs.next()) throw new ResponseException(401, "Game not found");
 
                 var whiteUsername = rs.getString("white_username");
                 var blackUsername = rs.getString("black_username");
@@ -67,20 +67,18 @@ public class GameDAO {
                 return new Game(id, whiteUsername, blackUsername, gameName, board);
             }
         } catch (SQLException e) {
-            throw new DataAccessException(500, e.toString());
-        } catch (RequestException e) {
-            throw new DataAccessException(400, e.getMessage());
+            throw new ResponseException(500, e.toString());
         }
     }
 
-    public void claimSpot(int gameID, String username, String color) throws DataAccessException {
+    public void claimSpot(int gameID, String username, String color) throws ResponseException {
 
         Game game;
 
         try {
             game = findById(gameID);
-        } catch (DataAccessException e) {
-            throw new DataAccessException(400, "Invalid game ID");
+        } catch (ResponseException e) {
+            throw new ResponseException(400, "Invalid game ID");
         }
 
         if (color == null) return;
@@ -92,7 +90,7 @@ public class GameDAO {
 
                 preparedStatement.executeUpdate();
             } catch (SQLException e) {
-                throw new DataAccessException(500, "Server error: failed to claim spot");
+                throw new ResponseException(500, "Server error: failed to claim spot");
             }
         } else if (color.equals("BLACK") && game.blackUsername() == null) {
             try (var preparedStatement = conn.prepareStatement("UPDATE games SET black_username=? WHERE id=?")) {
@@ -101,17 +99,17 @@ public class GameDAO {
 
                 preparedStatement.executeUpdate();
             } catch (SQLException e) {
-                throw new DataAccessException(500, "Server error: failed to claim spot");
+                throw new ResponseException(500, "Server error: failed to claim spot");
             }
         } else if (color.equals("WHITE") || color.equals("BLACK")) {
-            throw new DataAccessException(403, "Server error: spot already taken");
+            throw new ResponseException(403, "Server error: spot already taken");
         }
 
         // Otherwise, we're chilling!
 
     }
 
-    public void updateGame(int gameID, String newGame) throws DataAccessException {
+    public void updateGame(int gameID, String newGame) throws ResponseException {
 
         findById(gameID); // make sure the game exists
 
@@ -121,11 +119,11 @@ public class GameDAO {
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException(500, "Server error: can't update board state");
+            throw new ResponseException(500, "Server error: can't update board state");
         }
     }
 
-    public ArrayList<Game> listGames() throws DataAccessException {
+    public ArrayList<Game> listGames() throws ResponseException {
         ArrayList<Game> games = new ArrayList<>();
 
         try (var preparedStatement = conn.prepareStatement("SELECT id, white_username, black_username, name, board_state FROM games")) {
@@ -143,25 +141,23 @@ public class GameDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(500, e.toString());
-        } catch (RequestException e) {
-            throw new DataAccessException(400, e.getMessage());
+            throw new ResponseException(500, e.toString());
         }
 
         return games;
     }
 
-    public void clear() throws DataAccessException {
+    public void clear() throws ResponseException {
         try (var createTableStatement = conn.prepareStatement("DELETE FROM games")) {
             createTableStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException(500, "Error clearing games");
+            throw new ResponseException(500, "Error clearing games");
         }
 
         try (var createTableStatement = conn.prepareStatement("ALTER TABLE games AUTO_INCREMENT = 1")) {
             createTableStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException(500, "Error resetting games index");
+            throw new ResponseException(500, "Error resetting games index");
         }
     }
 }

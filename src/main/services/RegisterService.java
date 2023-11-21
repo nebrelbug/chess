@@ -1,8 +1,8 @@
 package services;
 
 import dataAccess.AuthDAO;
-import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
+import exceptions.ResponseException;
 import models.AuthToken;
 import models.User;
 
@@ -14,16 +14,16 @@ public class RegisterService {
     AuthDAO authDao;
     UserDAO userDAO;
 
-    public RegisterService() throws DataAccessException {
+    public RegisterService() throws ResponseException {
         authDao = new AuthDAO();
         userDAO = new UserDAO();
     }
 
-    public AuthToken register(String username, String password, String email) throws DataAccessException {
+    public AuthToken register(String username, String password, String email) throws ResponseException {
 
-        if (username == null || password == null || email == null) throw new DataAccessException(400, "bad request");
+        if (username == null || password == null || email == null) throw new ResponseException(400, "bad request");
 
-        if (userDAO.usernameExists(username)) throw new DataAccessException(403, "already taken");
+        if (userDAO.usernameExists(username)) throw new ResponseException(403, "already taken");
         User newUser = new User(username, password, email);
         userDAO.insert(newUser);
 

@@ -1,6 +1,7 @@
 package handlers;
 
 import dataAccess.DataAccessException;
+import exceptions.ResponseException;
 import models.Game;
 import response.ErrorResponse;
 import response.Stringifier;
@@ -26,7 +27,7 @@ public class ListGamesHandler {
             result.status(200);
             return Stringifier.jsonify(new Result(games));
 
-        } catch (DataAccessException e) {
+        } catch (ResponseException e) {
             result.status(e.code);
 
             return Stringifier.jsonify(new ErrorResponse(e.getMessage()));

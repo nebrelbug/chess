@@ -1,4 +1,5 @@
 import dataAccess.DataAccessException;
+import exceptions.ResponseException;
 import spark.*;
 import handlers.*;
 
@@ -6,12 +7,12 @@ public class Server {
     public static void main(String[] args) throws Exception {
 
         new DatabaseInit().initialize();
-        
+
         new Server().run();
 
     }
 
-    private void run() throws DataAccessException {
+    private void run() throws ResponseException {
 
         var authHandler = new AuthHandler();
         var registerHandler = new RegisterHandler();

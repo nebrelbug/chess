@@ -1,6 +1,7 @@
 package passoffTests.serviceTests;
 
 import dataAccess.DataAccessException;
+import exceptions.ResponseException;
 import models.AuthToken;
 import models.Game;
 import org.junit.jupiter.api.Assertions;
@@ -25,7 +26,7 @@ public class ListGamesServiceTest {
     static int gameID2;
 
     @BeforeAll
-    public static void before() throws DataAccessException {
+    public static void before() throws ResponseException {
         ClearDbService.clear();
 
         auth = new RegisterService().register(username, password, email);
@@ -35,7 +36,7 @@ public class ListGamesServiceTest {
     }
 
     @Test
-    public void positiveTest() throws DataAccessException {
+    public void positiveTest() throws ResponseException {
         ArrayList<Game> games = ListGamesService.listGames(auth.authToken());
 
         Assertions.assertEquals(games.size(), 2);
@@ -45,7 +46,7 @@ public class ListGamesServiceTest {
     @Test
     public void negativeTest() {
 
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             ListGamesService.listGames("fake auth token"
             );
         });

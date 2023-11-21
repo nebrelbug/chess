@@ -1,7 +1,7 @@
 package passoffTests.daoTests;
 
 import chess.*;
-import dataAccess.DataAccessException;
+import exceptions.ResponseException;
 import dataAccess.GameDAO;
 import models.Game;
 import org.junit.jupiter.api.Assertions;
@@ -14,30 +14,30 @@ public class GameDaoTest {
 
     GameDAO dao;
 
-    public GameDaoTest() throws DataAccessException {
+    public GameDaoTest() throws ResponseException {
         this.dao = new GameDAO();
     }
 
     @BeforeEach
-    public void before() throws DataAccessException {
+    public void before() throws ResponseException {
         dao.clear();
     }
 
     @Test
-    public void createPositiveTest() throws DataAccessException {
+    public void createPositiveTest() throws ResponseException {
         dao.create("gamename");
         Assertions.assertEquals(dao.listGames().size(), 1);
     }
 
     @Test
     public void createNegativeTest() {
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             dao.create(null);
         });
     }
 
     @Test
-    public void findByIdPositiveTest() throws DataAccessException {
+    public void findByIdPositiveTest() throws ResponseException {
         int id = dao.create("gamename");
         Game game = dao.findById(id);
 
@@ -48,13 +48,13 @@ public class GameDaoTest {
 
     @Test
     public void findByIdNegativeTest() {
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             dao.findById(0);
         });
     }
 
     @Test
-    public void claimSpotPositiveTest() throws DataAccessException {
+    public void claimSpotPositiveTest() throws ResponseException {
         int id = dao.create("gamename");
         dao.claimSpot(id, "fakeuser", "WHITE");
         Game game = dao.findById(id);
@@ -64,7 +64,7 @@ public class GameDaoTest {
 
     @Test
     public void claimSpotNegativeTest() {
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             int id = dao.create("gamename");
             dao.claimSpot(id, "fakeuser", "WHITE");
             dao.claimSpot(id, "anotheruser", "WHITE");
@@ -73,7 +73,7 @@ public class GameDaoTest {
     }
 
     @Test
-    public void updateGamePositiveTest() throws DataAccessException {
+    public void updateGamePositiveTest() throws ResponseException {
         int id = dao.create("gamename");
         Game game = dao.findById(id);
 
@@ -89,14 +89,14 @@ public class GameDaoTest {
 
     @Test
     public void updateGameNegativeTest() {
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             Game game = new Game(3, "a", "b", "name", new BenChessGame());
             dao.updateGame(0, Stringifier.jsonify(game.game()));
         });
     }
 
     @Test
-    public void listGamesPositiveTest() throws DataAccessException {
+    public void listGamesPositiveTest() throws ResponseException {
         dao.create("game1");
         dao.create("game2");
         dao.create("game3");
@@ -106,13 +106,13 @@ public class GameDaoTest {
     }
 
     @Test
-    public void listGamesNegativeTest() throws DataAccessException {
+    public void listGamesNegativeTest() throws ResponseException {
         var games = dao.listGames();
         Assertions.assertEquals(0, games.size());
     }
 
     @Test
-    public void clearTest() throws DataAccessException {
+    public void clearTest() throws ResponseException {
         dao.create("game1");
         dao.create("game2");
         dao.create("game3");

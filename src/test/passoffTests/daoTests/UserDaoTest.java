@@ -1,7 +1,7 @@
 package passoffTests.daoTests;
 
 import dataAccess.UserDAO;
-import dataAccess.DataAccessException;
+import exceptions.ResponseException;
 import models.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,30 +12,30 @@ public class UserDaoTest {
 
     UserDAO dao;
 
-    public UserDaoTest() throws DataAccessException {
+    public UserDaoTest() throws ResponseException {
         this.dao = new UserDAO();
     }
 
     @BeforeEach
-    public void before() throws DataAccessException {
+    public void before() throws ResponseException {
         dao.clear();
     }
 
     @Test
-    public void insertPositiveTest() throws DataAccessException {
+    public void insertPositiveTest() throws ResponseException {
         dao.insert(new User("ben", "p", "e"));
         Assertions.assertTrue(dao.usernameExists("ben"));
     }
 
     @Test
     public void insertNegativeTest() {
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             dao.insert(null);
         });
     }
 
     @Test
-    public void getByUsernamePositiveTest() throws DataAccessException {
+    public void getByUsernamePositiveTest() throws ResponseException {
         dao.insert(new User("ben", "p", "e"));
         var user = dao.getByUsername("ben");
         Assertions.assertEquals("ben", user.username());
@@ -45,13 +45,13 @@ public class UserDaoTest {
 
     @Test
     public void getByUsernameNegativeTest() {
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             dao.getByUsername("unknownuser");
         });
     }
 
     @Test
-    public void usernameExistsPositiveTest() throws DataAccessException {
+    public void usernameExistsPositiveTest() throws ResponseException {
         dao.insert(new User("ben", "p", "e"));
         Assertions.assertTrue(dao.usernameExists("ben"));
     }
@@ -62,7 +62,7 @@ public class UserDaoTest {
     }
 
     @Test
-    public void removePositiveTest() throws DataAccessException {
+    public void removePositiveTest() throws ResponseException {
         var u = new User("u1", "p", "e");
         dao.insert(u);
         Assertions.assertTrue(dao.usernameExists("u1"));
@@ -72,13 +72,13 @@ public class UserDaoTest {
 
     @Test
     public void removeNegativeTest() {
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             dao.remove(null);
         });
     }
 
     @Test
-    public void clearTest() throws DataAccessException {
+    public void clearTest() throws ResponseException {
         dao.insert(new User("u1", "p", "e"));
         dao.insert(new User("u2", "p", "e"));
 

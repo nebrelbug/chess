@@ -1,7 +1,7 @@
 package passoffTests.serviceTests;
 
 import dataAccess.AuthDAO;
-import dataAccess.DataAccessException;
+import exceptions.ResponseException;
 import models.AuthToken;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.*;
@@ -19,13 +19,13 @@ public class AuthServiceTest {
     static AuthToken auth;
 
     @BeforeAll
-    public static void before() throws DataAccessException {
+    public static void before() throws ResponseException {
         ClearDbService.clear();
         auth = new RegisterService().register(username, password, email);
     }
 
     @Test
-    public void loginPositiveTest() throws DataAccessException {
+    public void loginPositiveTest() throws ResponseException {
 
         AuthToken token = new AuthService().login(username, password);
 
@@ -35,17 +35,17 @@ public class AuthServiceTest {
     @Test
     public void loginNegativeTest() {
 
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             new AuthService().login(username, "wrong");
         });
     }
 
     @Test
-    public void logoutPositiveTest() throws DataAccessException {
+    public void logoutPositiveTest() throws ResponseException {
 
         new AuthService().logout(auth.authToken());
 
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             new AuthDAO().getByTokenString(auth.authToken());
         });
     }
@@ -54,7 +54,7 @@ public class AuthServiceTest {
     @Test
     public void logoutNegativeTest() {
 
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             new AuthService().logout("Nonexistent token");
         });
 

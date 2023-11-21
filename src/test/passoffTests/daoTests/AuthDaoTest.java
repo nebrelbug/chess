@@ -1,7 +1,7 @@
 package passoffTests.daoTests;
 
 import dataAccess.AuthDAO;
-import dataAccess.DataAccessException;
+import exceptions.ResponseException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.*;
 
@@ -10,17 +10,17 @@ public class AuthDaoTest {
 
     AuthDAO dao;
 
-    public AuthDaoTest() throws DataAccessException {
+    public AuthDaoTest() throws ResponseException {
         this.dao = new AuthDAO();
     }
 
     @BeforeEach
-    public void before() throws DataAccessException {
+    public void before() throws ResponseException {
         dao.clear();
     }
 
     @Test
-    public void getByTokenStringPositiveTest() throws DataAccessException {
+    public void getByTokenStringPositiveTest() throws ResponseException {
         var token = dao.generate("myuser");
         var targetToken = dao.getByTokenString(token.authToken());
         Assertions.assertEquals(token.authToken(), targetToken.authToken());
@@ -28,13 +28,13 @@ public class AuthDaoTest {
 
     @Test
     public void getByTokenStringNegativeTest() {
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             dao.getByTokenString("nonexistenttoken");
         });
     }
 
     @Test
-    public void removePositiveTest() throws DataAccessException {
+    public void removePositiveTest() throws ResponseException {
         var token = dao.generate("user1");
         dao.remove(token);
         Assertions.assertEquals(0, dao.listTokens().size());
@@ -42,27 +42,27 @@ public class AuthDaoTest {
 
     @Test
     public void removeNegativeTest() {
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             dao.remove(null);
         });
     }
 
 
     @Test
-    public void generatePositiveTest() throws DataAccessException {
+    public void generatePositiveTest() throws ResponseException {
         dao.generate("myuser");
         Assertions.assertEquals(1, dao.listTokens().size());
     }
 
     @Test
     public void generateNegativeTest() {
-        Assertions.assertThrows(DataAccessException.class, () -> {
+        Assertions.assertThrows(ResponseException.class, () -> {
             dao.generate(null);
         });
     }
 
     @Test
-    public void clearTest() throws DataAccessException {
+    public void clearTest() throws ResponseException {
         dao.generate("myuser");
         dao.generate("user2");
         dao.generate("user3");

@@ -2,6 +2,7 @@ package passoffTests.serviceTests;
 
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
+import exceptions.ResponseException;
 import models.AuthToken;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 public class ClearDbServiceTest {
 
     @BeforeAll
-    public static void before() throws DataAccessException {
+    public static void before() throws ResponseException {
         ClearDbService.clear();
 
         var rService = new RegisterService();
@@ -24,7 +25,7 @@ public class ClearDbServiceTest {
     }
 
     @Test
-    public void clearTest() throws DataAccessException {
+    public void clearTest() throws ResponseException {
         ClearDbService.clear();
 
         ArrayList<AuthToken> authTokens = new AuthDAO().listTokens();

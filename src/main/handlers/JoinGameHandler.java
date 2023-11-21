@@ -1,7 +1,6 @@
 package handlers;
 
-import dataAccess.DataAccessException;
-import request.RequestException;
+import exceptions.ResponseException;
 import request.RequestParser;
 import response.ErrorResponse;
 import response.Stringifier;
@@ -26,12 +25,8 @@ public class JoinGameHandler {
             result.status(200);
             return Stringifier.jsonify(new Object());
 
-        } catch (DataAccessException e) {
+        } catch (ResponseException e) {
             result.status(e.code);
-
-            return Stringifier.jsonify(new ErrorResponse(e.getMessage()));
-        } catch (RequestException e) {
-            result.status(400);
 
             return Stringifier.jsonify(new ErrorResponse(e.getMessage()));
         }

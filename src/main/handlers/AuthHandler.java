@@ -2,7 +2,6 @@ package handlers;
 
 import exceptions.ResponseException;
 import models.AuthToken;
-import request.RequestParser;
 import response.ErrorResponse;
 import response.Stringifier;
 import services.AuthService;
@@ -24,7 +23,7 @@ public class AuthHandler {
         result.type("application/json");
 
         try {
-            Credentials creds = RequestParser.parse(request.body(), Credentials.class);
+            Credentials creds = models.Deserializer.parse(request.body(), Credentials.class);
 
             AuthToken newAuthToken = service.login(creds.username, creds.password);
 

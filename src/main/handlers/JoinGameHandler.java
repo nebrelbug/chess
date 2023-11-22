@@ -1,7 +1,6 @@
 package handlers;
 
 import exceptions.ResponseException;
-import request.RequestParser;
 import response.ErrorResponse;
 import response.Stringifier;
 import services.JoinGameService;
@@ -17,7 +16,7 @@ public class JoinGameHandler {
         result.type("application/json");
 
         try {
-            Body body = RequestParser.parse(request.body(), Body.class);
+            Body body = models.Deserializer.parse(request.body(), Body.class);
             String tokenString = request.headers("Authorization");
 
             JoinGameService.join(tokenString, body.gameID, body.playerColor);

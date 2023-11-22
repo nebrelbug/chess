@@ -3,7 +3,6 @@ package dataAccess;
 import chess.BenChessGame;
 import exceptions.ResponseException;
 import models.Game;
-import request.RequestParser;
 import response.Stringifier;
 
 import java.sql.Connection;
@@ -62,7 +61,7 @@ public class GameDAO {
                 var gameName = rs.getString("name");
                 var boardState = rs.getString("board_state");
 
-                BenChessGame board = RequestParser.parse(boardState, BenChessGame.class);
+                BenChessGame board = models.Deserializer.parse(boardState, BenChessGame.class);
 
                 return new Game(id, whiteUsername, blackUsername, gameName, board);
             }
@@ -135,7 +134,7 @@ public class GameDAO {
                     var name = rs.getString("name");
                     var boardState = rs.getString("board_state");
 
-                    BenChessGame board = RequestParser.parse(boardState, BenChessGame.class);
+                    BenChessGame board = models.Deserializer.parse(boardState, BenChessGame.class);
 
                     games.add(new Game(id, whiteUsername, blackUsername, name, board));
                 }

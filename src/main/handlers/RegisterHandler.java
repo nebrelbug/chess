@@ -1,9 +1,6 @@
 package handlers;
 
 import exceptions.ResponseException;
-import request.RequestException;
-import request.RequestParser;
-import dataAccess.DataAccessException;
 import models.AuthToken;
 import response.ErrorResponse;
 import response.Stringifier;
@@ -26,7 +23,7 @@ public class RegisterHandler {
         result.type("application/json");
 
         try {
-            UserInfo userInfo = RequestParser.parse(request.body(), UserInfo.class);
+            UserInfo userInfo = models.Deserializer.parse(request.body(), UserInfo.class);
 
             AuthToken newAuthToken = service.register(userInfo.username, userInfo.password, userInfo.email);
 

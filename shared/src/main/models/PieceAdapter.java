@@ -1,4 +1,4 @@
-package request;
+package models;
 
 import chess.BenChessPiece;
 import chess.ChessPiece;

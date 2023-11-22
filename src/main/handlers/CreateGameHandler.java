@@ -1,7 +1,6 @@
 package handlers;
 
 import exceptions.ResponseException;
-import request.RequestParser;
 import response.ErrorResponse;
 import response.Stringifier;
 import services.CreateGameService;
@@ -20,7 +19,7 @@ public class CreateGameHandler {
         result.type("application/json");
 
         try {
-            Body body = RequestParser.parse(request.body(), Body.class);
+            Body body = models.Deserializer.parse(request.body(), Body.class);
             String tokenString = request.headers("Authorization");
 
             int gameID = CreateGameService.create(tokenString, body.gameName);

@@ -4,16 +4,18 @@ import java.util.Arrays;
 
 import com.google.gson.Gson;
 import exceptions.ResponseException;
+import models.AuthToken;
+import server.ServerFacade;
 
 import static ui.EscapeSequences.*;
 
 public class ChessClient {
-    private final String serverUrl;
+    private final ServerFacade server;
     private State state = State.LOGGED_OUT;
+    private AuthToken authToken = null;
 
     public ChessClient(String serverUrl) {
-//        server = new ServerFacade(serverUrl);
-        this.serverUrl = serverUrl;
+        server = new server.ServerFacade(serverUrl);
     }
 
     public String eval(String input) {
@@ -22,10 +24,10 @@ public class ChessClient {
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-//                case "signin" -> signIn(params);
-//                case "rescue" -> rescuePet(params);
+                case "login" -> login(params);
+                case "register" -> register(params);
 //                case "list" -> listPets();
-//                case "signout" -> signOut();
+                case "logout" -> logout();
 //                case "adopt" -> adoptPet(params);
 //                case "adoptall" -> adoptAllPets();
                 case "quit" -> "quit";
@@ -36,11 +38,48 @@ public class ChessClient {
         }
     }
 
+    private String login(String[] params) {
+        try {
+            authToken = server.login(params[0], params[1]);
+            state = State.LOGGED_IN;
+
+            return "Welcome to GubChess, " + authToken.username() + "!";
+
+        } catch (ResponseException e) {
+            return formatError("Invalid username or password");
+        }
+    }
+
+    private String register(String[] params) {
+        try {
+            authToken = server.register(params[0], params[1], params[2]);
+            state = State.LOGGED_IN;
+
+            return "Welcome to GubChess, " + authToken.username() + "!";
+
+        } catch (ResponseException e) {
+            return formatError("Failed to register user");
+        }
+    }
+
+    private String logout() {
+        try {
+            server.logout(authToken.authToken());
+            state = State.LOGGED_OUT;
+
+            return "Successfully signed out";
+
+        } catch (ResponseException e) {
+            return formatError("Failed to log out");
+        }
+    }
+
+
     String[][] loggedOutCommands = {
-            {"register <USERNAME> <PASSWORD> <EMAIL>", "to create an account"},
-            {"login <USERNAME> <PASSWORD>", "to play chess"},
-            {"quit", "playing chess"},
-            {"help", "with possible commands"}
+            {"register <USERNAME> <PASSWORD> <EMAIL>", "to create an account"}, // implemented
+            {"login <USERNAME> <PASSWORD>", "to play chess"}, // implemented
+            {"quit", "playing chess"}, // implemented
+            {"help", "with possible commands"} // implemented
     };
 
     String[][] loggedInCommands = {
@@ -48,9 +87,9 @@ public class ChessClient {
             {"list", "games"},
             {"join <ID> [WHITE|BLACK|<empty>]", "a game"},
             {"observe <ID>", "a game"},
-            {"logout", "when you are done"},
-            {"quit", "playing chess"},
-            {"help", "with possible commands"}
+            {"logout", "when you are done"}, // implemented
+            {"quit", "playing chess"}, // implemented
+            {"help", "with possible commands"} // implemented
     };
 
     private String generateHelpMenu(String[][] commands) {
@@ -72,12 +111,16 @@ public class ChessClient {
     }
 
 
-    public String help() {
+    private String help() {
         if (state == State.LOGGED_OUT) {
             return generateHelpMenu(loggedOutCommands);
         }
 
         return generateHelpMenu(loggedInCommands);
+    }
+
+    private String formatError(String error) {
+        return SET_TEXT_COLOR_RED + error;
     }
 
     public String inputPrompt() {

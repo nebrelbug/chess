@@ -18,9 +18,7 @@ public class AuthService {
         authDao = new AuthDAO();
         userDAO = new UserDAO();
     }
-
-    // TODO: delete auth tokens after logging in or out
-
+    
     public AuthToken login(String username, String password) throws ResponseException {
 
         if (username == null || password == null) throw new ResponseException(400, "bad request");

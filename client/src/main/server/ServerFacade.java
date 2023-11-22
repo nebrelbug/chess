@@ -3,6 +3,7 @@ package server;
 import exceptions.ResponseException;
 
 import com.google.gson.Gson;
+import models.AuthToken;
 
 import java.io.*;
 import java.net.*;
@@ -15,12 +16,49 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
+    record loginCredentials(String username, String password) {
+    }
+
+    record registerCredentials(String username, String password, String email) {
+    }
+
+    public AuthToken login(String username, String password) throws ResponseException {
+        var path = "/session";
+        return this.makeRequest("POST",
+                path,
+                new loginCredentials(username, password),
+                null,
+                models.AuthToken.class);
+    }
+
+    public AuthToken register(String username, String password, String email) throws ResponseException {
+        var path = "/user";
+        return this.makeRequest("POST",
+                path,
+                new registerCredentials(username, password, email),
+                null,
+                models.AuthToken.class);
+    }
+
+    public void logout(String tokenString) throws ResponseException {
+        var path = "/session";
+        this.makeRequest("DELETE",
+                path,
+                null,
+                tokenString,
+                null);
+    }
+
+    private <T> T makeRequest(String method, String path, Object request, String authToken, Class<T> responseClass) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
+
+            if (authToken != null) {
+                http.setRequestProperty("Authorization", authToken);
+            }
 
             writeBody(request, http);
             http.connect();

@@ -4,9 +4,11 @@ import exceptions.ResponseException;
 
 import com.google.gson.Gson;
 import models.AuthToken;
+import models.Game;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 
 public class ServerFacade {
 
@@ -20,6 +22,18 @@ public class ServerFacade {
     }
 
     record registerCredentials(String username, String password, String email) {
+    }
+
+    record createGameInfo(String gameName) {
+    }
+
+    record createGameResponse(String gameID) {
+    }
+
+    record gameList(ArrayList<Game> games) {
+    }
+
+    record joinGameRequest(String playerColor, int gameID) {
     }
 
     public AuthToken login(String username, String password) throws ResponseException {
@@ -38,6 +52,49 @@ public class ServerFacade {
                 new registerCredentials(username, password, email),
                 null,
                 models.AuthToken.class);
+    }
+
+    public int create(String tokenString, String gameName) throws ResponseException {
+        var path = "/game";
+        var res = this.makeRequest("POST",
+                path,
+                new createGameInfo(gameName),
+                tokenString,
+                createGameResponse.class);
+
+        return Integer.parseInt(res.gameID);
+    }
+
+    public ArrayList<Game> list(String tokenString) throws ResponseException {
+        var path = "/game";
+
+        return this.makeRequest("GET",
+                path,
+                null,
+                tokenString,
+                gameList.class).games;
+    }
+
+    public void join(String tokenString, int gameId, String color) throws ResponseException {
+        var path = "/game";
+
+        if (color != null) color = color.toUpperCase();
+
+        this.makeRequest("PUT",
+                path,
+                new joinGameRequest(color, gameId),
+                tokenString,
+                null);
+    }
+
+    public Game getGame(String tokenString, int gameId) throws ResponseException {
+        var path = "/game/" + gameId;
+
+        return this.makeRequest("GET",
+                path,
+                null,
+                tokenString,
+                Game.class);
     }
 
     public void logout(String tokenString) throws ResponseException {

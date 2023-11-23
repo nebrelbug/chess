@@ -25,6 +25,10 @@ public class BenChessGame implements ChessGame {
         this.teamTurn = team;
     }
 
+    public void initialize() {
+        this.board.resetBoard();
+    }
+
     private Collection<ChessMove> _validMoves(ChessPosition startPosition, ChessBoard testBoard) {
         ChessPiece pieceThere = testBoard.getPiece(startPosition);
 
@@ -155,7 +159,6 @@ public class BenChessGame implements ChessGame {
                     for (ChessMove move : validMoves) {
                         if (!willCauseCheck(move, teamColor)) {
                             checkmate = false;
-                            System.out.println("Found escape at " + move);
                         }
                         ;
                     }

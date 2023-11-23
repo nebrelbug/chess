@@ -26,16 +26,18 @@ public class BenChessPiece implements ChessPiece {
 
     @Override
     public char toChar() {
-        char res = switch (this.pieceType) {
-            case KING -> 'K';
-            case QUEEN -> 'Q';
-            case BISHOP -> 'B';
-            case KNIGHT -> 'H';
-            case ROOK -> 'R';
-            case PAWN -> 'P';
+        char res;
+
+        res = switch (this.pieceType) {
+            case KING -> '♚';
+            case QUEEN -> '♛';
+            case BISHOP -> '♝';
+            case KNIGHT -> '♞';
+            case ROOK -> '♜';
+            case PAWN -> '♟';
         };
 
-        return this.color == ChessGame.TeamColor.BLACK ? Character.toLowerCase(res) : res;
+        return res;
     }
 
     public String toString() {

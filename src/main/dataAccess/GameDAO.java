@@ -29,7 +29,9 @@ public class GameDAO {
             preparedStatement.setNull(1, Types.VARCHAR);
             preparedStatement.setNull(2, Types.VARCHAR);
             preparedStatement.setString(3, gameName);
-            preparedStatement.setString(4, Stringifier.jsonify(new BenChessGame()));
+            var initialState = new BenChessGame();
+            initialState.initialize();
+            preparedStatement.setString(4, Stringifier.jsonify(initialState));
 
             preparedStatement.executeUpdate();
 

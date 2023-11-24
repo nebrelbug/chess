@@ -1,8 +1,8 @@
 package ui;
 
 import chess.BenChessPosition;
+import chess.ChessBoard;
 import chess.ChessGame;
-import exceptions.ResponseException;
 import models.Game;
 
 import java.util.Arrays;
@@ -13,9 +13,13 @@ import static ui.EscapeSequences.*;
 
 public class BoardDisplay {
 
-    public static String display(Game game, boolean blackPerspective) throws ResponseException {
-
+    public static String display(Game game, boolean blackPerspective) {
         var board = game.game().getBoard();
+
+        return display(board, blackPerspective);
+    }
+
+    public static String display(ChessBoard board, boolean blackPerspective) {
 
         StringBuilder sb = new StringBuilder();
 
@@ -65,7 +69,7 @@ public class BoardDisplay {
                 }
 
 
-                var squareBackground = (row + col) % 2 == 0 ? SET_BG_COLOR_DARK_RED : SET_BG_COLOR_OFF_WHITE;
+                var squareBackground = (row + col) % 2 == 0 ? SET_BG_COLOR_DARK_GREEN : SET_BG_COLOR_GREEN;
 
                 sb.append(squareBackground)
                         .append(" ")

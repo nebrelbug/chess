@@ -97,22 +97,13 @@ public class BenChessBoard implements ChessBoard {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        for (int row = 0; row < 8; row++) {
-            if (row != 0) sb.append("\n");
-            sb.append("|");
-            for (int col = 0; col < 8; col++) {
-                char piece = board[row][col] == null ? ' ' : board[row][col].toChar();
-
-                sb.append(piece).append("|");
-            }
-        }
-        return sb.toString();
+        return ui.BoardDisplay.display(this, false);
     }
 
     @Override
     public boolean equals(Object o) {
+        if (getClass() != o.getClass())
+            return false;
         return toString().equals(o.toString());
     }
 

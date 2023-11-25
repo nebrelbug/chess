@@ -1,6 +1,7 @@
 package client;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import exceptions.ResponseException;
 import models.AuthToken;
@@ -64,7 +65,10 @@ public class ChessClient {
         }
     }
 
-    private String create(String[] params) {
+    private String create(String[] params) throws ResponseException {
+
+        assertSignedIn();
+
         try {
             int newGameId = server.create(authToken.authToken(), params[0]);
 
@@ -75,7 +79,10 @@ public class ChessClient {
         }
     }
 
-    private String list() {
+    private String list() throws ResponseException {
+
+        assertSignedIn();
+
         try {
 
             var sb = new StringBuilder();
@@ -112,14 +119,22 @@ public class ChessClient {
         }
     }
 
-    private String join(String[] params) {
+    private String join(String[] params) throws ResponseException {
+
+        assertSignedIn();
+
         try {
             server.join(authToken.authToken(), Integer.parseInt(params[0]), params[1]);
 
             var game = server.getGame(authToken.authToken(), Integer.parseInt(params[0]));
 
-            System.out.println(BoardDisplay.display(game, false));
-            System.out.println(BoardDisplay.display(game, true));
+            if (Objects.equals(params[1], "white")) {
+                System.out.println(BoardDisplay.display(game, true));
+                System.out.println(BoardDisplay.display(game, false));
+            } else {
+                System.out.println(BoardDisplay.display(game, false));
+                System.out.println(BoardDisplay.display(game, true));
+            }
 
             return "Successfully joined game #" + params[0] + " as color " + params[1];
 
@@ -128,15 +143,16 @@ public class ChessClient {
         }
     }
 
-    private String observe(String[] params) {
+    private String observe(String[] params) throws ResponseException {
+        assertSignedIn();
+
         try {
             server.join(authToken.authToken(), Integer.parseInt(params[0]), null);
 
             var game = server.getGame(authToken.authToken(), Integer.parseInt(params[0]));
 
             System.out.println(BoardDisplay.display(game, false));
-            System.out.println(BoardDisplay.display(game, true));
-            
+
             return "Successfully watching game #" + params[0];
 
         } catch (ResponseException e) {
@@ -144,7 +160,10 @@ public class ChessClient {
         }
     }
 
-    private String logout() {
+    private String logout() throws ResponseException {
+
+        assertSignedIn();
+
         try {
             server.logout(authToken.authToken());
             state = State.LOGGED_OUT;

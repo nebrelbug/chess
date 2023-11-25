@@ -31,8 +31,12 @@ public class AuthTests {
 
     @Test
     public void loginPositiveTest() throws ResponseException {
-        server.register("a", "b", "c@d");
-        server.login("a", "b");
+        var token1 = server.register("a", "b", "c@d");
+        var token2 = server.login("a", "b");
+
+        Assertions.assertEquals(36, token1.authToken().length());
+        Assertions.assertEquals(36, token2.authToken().length());
+        Assertions.assertEquals(token1.username(), token2.username());
     }
 
     @Test
@@ -48,6 +52,9 @@ public class AuthTests {
         server.register("a", "b", "c@d");
         AuthToken token = server.login("a", "b");
         server.logout(token.authToken());
+
+        Assertions.assertThrows(ResponseException.class, () -> server.create(token.authToken(), "newgame"));
+
     }
 
     @Test

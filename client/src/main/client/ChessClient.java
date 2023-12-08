@@ -7,17 +7,20 @@ import exceptions.ResponseException;
 import models.AuthToken;
 import server.ServerFacade;
 import ui.BoardDisplay;
+import websocket.NotificationHandler;
+import websocket.WebSocketFacade;
 
 import static ui.EscapeSequences.*;
 
 public class ChessClient {
     private final ServerFacade server;
+    private final WebSocketFacade ws;
     private State state = State.LOGGED_OUT;
     private AuthToken authToken = null;
 
-    public ChessClient(String serverUrl) {
+    public ChessClient(String serverUrl, NotificationHandler notificationHandler) throws ResponseException {
         server = new server.ServerFacade(serverUrl);
-
+        ws = new WebSocketFacade(serverUrl, notificationHandler);
     }
 
     public String eval(String input) {
@@ -135,6 +138,8 @@ public class ChessClient {
                 System.out.println(BoardDisplay.display(game, false));
                 System.out.println(BoardDisplay.display(game, true));
             }
+
+            ws.joinPlayer(authToken.authToken(), params[1]);
 
             return "Successfully joined game #" + params[0] + " as color " + params[1];
 

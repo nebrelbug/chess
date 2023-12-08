@@ -2,6 +2,7 @@ import dataAccess.DataAccessException;
 import exceptions.ResponseException;
 import spark.*;
 import handlers.*;
+import websocket.WebSocketHandler;
 
 public class Server {
     public static void main(String[] args) throws Exception {
@@ -17,12 +18,14 @@ public class Server {
         var authHandler = new AuthHandler();
         var registerHandler = new RegisterHandler();
 
-
         // Specify the port you want the server to listen on
         Spark.port(8080);
 
         // Register a directory for hosting static files
         Spark.externalStaticFileLocation("web");
+
+        // Websocket listener
+        Spark.webSocket("/connect", WebSocketHandler.class);
 
         Spark.delete("/db", ClearDbHandler::handleRequest);
 

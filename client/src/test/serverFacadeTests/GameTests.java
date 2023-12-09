@@ -1,5 +1,6 @@
 package serverFacadeTests;
 
+import chess.ChessGame;
 import exceptions.ResponseException;
 import models.AuthToken;
 import org.junit.jupiter.api.Assertions;
@@ -73,7 +74,7 @@ public class GameTests {
         int gameId1 = server.create(token.authToken(), "Game 1");
         int gameId2 = server.create(token.authToken(), "Game 2");
 
-        server.join(token.authToken(), gameId1, "WHITE"); // joining
+        server.join(token.authToken(), gameId1, ChessGame.TeamColor.WHITE); // joining
         server.join(token.authToken(), gameId2, null); // observing
 
         var game1 = server.getGame(token.authToken(), gameId1);
@@ -87,10 +88,10 @@ public class GameTests {
     public void joinGameNegativeTest() throws ResponseException {
         int gameId1 = server.create(token.authToken(), "Game 1");
 
-        server.join(token.authToken(), gameId1, "WHITE"); // joining
+        server.join(token.authToken(), gameId1, ChessGame.TeamColor.WHITE); // joining
 
         Assertions.assertThrows(ResponseException.class, () -> {
-            server.join(token.authToken(), gameId1, "WHITE"); // spot already taken
+            server.join(token.authToken(), gameId1, ChessGame.TeamColor.WHITE); // spot already taken
         });
     }
 
@@ -98,7 +99,7 @@ public class GameTests {
     public void getGamePositiveTest() throws ResponseException {
         int gameId1 = server.create(token.authToken(), "Game 1");
 
-        server.join(token.authToken(), gameId1, "WHITE"); // joining
+        server.join(token.authToken(), gameId1, ChessGame.TeamColor.WHITE); // joining
 
         var game = server.getGame(token.authToken(), gameId1);
 

@@ -14,9 +14,17 @@ import java.util.ArrayList;
 public class ListGamesService {
 
     public static ArrayList<Game> listGames(String tokenString) throws ResponseException {
-        new AuthDAO().getByTokenString(tokenString); // this will throw if invalid token
+        var dao = new AuthDAO();
 
-        return new GameDAO().listGames();
+        dao.getByTokenString(tokenString); // this will throw if invalid token
+
+        dao.close();
+
+        var gameDao = new GameDAO();
+        var games = gameDao.listGames();
+        gameDao.close();
+
+        return games;
     }
 
 }

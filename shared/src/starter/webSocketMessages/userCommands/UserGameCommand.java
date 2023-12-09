@@ -1,5 +1,8 @@
 package webSocketMessages.userCommands;
 
+import chess.ChessGame;
+import chess.ChessMove;
+
 import java.util.Objects;
 
 /**
@@ -21,12 +24,17 @@ public class UserGameCommand {
 
     private final CommandType commandType;
     private final String authToken;
-    private final String data;
+    private final int gameID;
+    private final ChessGame.TeamColor color;
+    private final ChessMove move;
 
-    public UserGameCommand(String authToken, CommandType commandType, String data) {
+
+    public UserGameCommand(String authToken, CommandType commandType, int gameID, ChessGame.TeamColor color, ChessMove move) {
         this.authToken = authToken;
         this.commandType = commandType;
-        this.data = data;
+        this.gameID = gameID;
+        this.color = color;
+        this.move = move;
     }
 
     public CommandType getCommandType() {
@@ -37,8 +45,16 @@ public class UserGameCommand {
         return authToken;
     }
 
-    public String getData() {
-        return data;
+    public int getGameID() {
+        return gameID;
+    }
+
+    public ChessMove getMove() {
+        return move;
+    }
+
+    public ChessGame.TeamColor getColor() {
+        return color;
     }
 
     @Override

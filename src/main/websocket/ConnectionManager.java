@@ -1,5 +1,6 @@
 package websocket;
 
+import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import webSocketMessages.serverMessages.ServerMessage;
 
@@ -20,11 +21,15 @@ public class ConnectionManager {
     }
 
     public void broadcastExcluding(String excludeVisitorName, ServerMessage notification) throws IOException {
+
+        String notificationString = new Gson().toJson(notification);
+
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
                 if (!c.visitorName.equals(excludeVisitorName)) {
-                    c.send(notification.toString());
+                    c.send(notificationString);
+                    System.out.println("Broadcasting to: " + c.visitorName);
                 }
             } else {
                 removeList.add(c);
@@ -38,11 +43,14 @@ public class ConnectionManager {
     }
 
     public void singleBroadcast(String visitorName, ServerMessage notification) throws IOException {
+
+        String notificationString = new Gson().toJson(notification);
+
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
                 if (c.visitorName.equals(visitorName)) {
-                    c.send(notification.toString());
+                    c.send(notificationString);
                 }
             } else {
                 removeList.add(c);

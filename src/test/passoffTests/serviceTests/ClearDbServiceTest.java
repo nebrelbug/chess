@@ -28,7 +28,11 @@ public class ClearDbServiceTest {
     public void clearTest() throws ResponseException {
         ClearDbService.clear();
 
-        ArrayList<AuthToken> authTokens = new AuthDAO().listTokens();
+        var dao = new AuthDAO();
+
+        ArrayList<AuthToken> authTokens = dao.listTokens();
+
+        dao.close();
 
         Assertions.assertEquals(0, authTokens.size());
     }

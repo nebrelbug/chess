@@ -12,9 +12,17 @@ public class CreateGameService {
 
     public static int create(String tokenString, String gameName) throws ResponseException {
 
-        new AuthDAO().getByTokenString(tokenString); // this will throw if invalid token
+        var dao = new AuthDAO();
 
-        return new GameDAO().create(gameName);
+        dao.getByTokenString(tokenString); // this will throw if invalid token
+
+        dao.close();
+
+        var gameDao = new GameDAO();
+        var game = gameDao.create(gameName);
+        gameDao.close();
+
+        return game;
     }
 
 }

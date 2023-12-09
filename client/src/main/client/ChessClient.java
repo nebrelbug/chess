@@ -3,10 +3,12 @@ package client;
 import java.util.Arrays;
 import java.util.Objects;
 
+import chess.ChessGame;
 import exceptions.ResponseException;
 import models.AuthToken;
 import server.ServerFacade;
 import ui.BoardDisplay;
+import webSocketMessages.serverMessages.ServerMessage;
 import websocket.NotificationHandler;
 import websocket.WebSocketFacade;
 
@@ -16,11 +18,32 @@ public class ChessClient {
     private final ServerFacade server;
     private final WebSocketFacade ws;
     private State state = State.LOGGED_OUT;
+    private int currentGameID = -1;
+    private ChessGame.TeamColor currentTeamColor = null;
     private AuthToken authToken = null;
 
     public ChessClient(String serverUrl, NotificationHandler notificationHandler) throws ResponseException {
         server = new server.ServerFacade(serverUrl);
+
+//        notificationHandler.notify(new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, "TEXT NOTIFICATION"));
+
         ws = new WebSocketFacade(serverUrl, notificationHandler);
+    }
+
+    private void setGameID(int gameID) {
+        currentGameID = gameID;
+    }
+
+    private void resetGameID() {
+        currentGameID = -1;
+    }
+
+    private void setCurrentTeamColor(ChessGame.TeamColor teamColor) {
+        currentTeamColor = teamColor;
+    }
+
+    private void resetCurrentTeamColor() {
+        currentTeamColor = null;
     }
 
     public String eval(String input) {
@@ -122,24 +145,46 @@ public class ChessClient {
         }
     }
 
+    private ChessGame.TeamColor getTeamColor(String targetColor) {
+        ChessGame.TeamColor teamColor = null;
+
+        if (Objects.equals(targetColor, "w") || Objects.equals(targetColor, "white")) {
+            teamColor = ChessGame.TeamColor.WHITE;
+        } else if (Objects.equals(targetColor, "b") || Objects.equals(targetColor, "black")) {
+            teamColor = ChessGame.TeamColor.BLACK;
+        }
+
+        if (teamColor == null) {
+            throw new Error("Invalid color");
+        }
+
+        return teamColor;
+    }
+
+    private void displayBoard() throws ResponseException {
+        var game = server.getGame(authToken.authToken(), currentGameID);
+
+        switch (currentTeamColor) {
+            case WHITE -> System.out.println(BoardDisplay.display(game, false));
+            case BLACK -> System.out.println(BoardDisplay.display(game, true));
+        }
+    }
+
     private String join(String[] params) throws ResponseException {
 
         assertSignedIn();
 
         try {
-            server.join(authToken.authToken(), Integer.parseInt(params[0]), params[1]);
 
-            var game = server.getGame(authToken.authToken(), Integer.parseInt(params[0]));
+            int targetGameId = Integer.parseInt(params[0]);
+            ChessGame.TeamColor targetColor = getTeamColor(params[1]);
 
-            if (Objects.equals(params[1], "white")) {
-                System.out.println(BoardDisplay.display(game, true));
-                System.out.println(BoardDisplay.display(game, false));
-            } else {
-                System.out.println(BoardDisplay.display(game, false));
-                System.out.println(BoardDisplay.display(game, true));
-            }
+            server.join(authToken.authToken(), targetGameId, targetColor);
 
-            ws.joinPlayer(authToken.authToken(), params[1]);
+            setGameID(targetGameId);
+            setCurrentTeamColor(targetColor);
+
+            ws.joinPlayer(authToken.authToken(), currentGameID, targetColor); // this will trigger displayBoard
 
             return "Successfully joined game #" + params[0] + " as color " + params[1];
 
@@ -152,11 +197,15 @@ public class ChessClient {
         assertSignedIn();
 
         try {
-            server.join(authToken.authToken(), Integer.parseInt(params[0]), null);
+            int targetGameId = Integer.parseInt(params[0]);
 
-            var game = server.getGame(authToken.authToken(), Integer.parseInt(params[0]));
+            server.join(authToken.authToken(), targetGameId, null);
+
+            var game = server.getGame(authToken.authToken(), targetGameId);
 
             System.out.println(BoardDisplay.display(game, false));
+
+            ws.joinObserver(authToken.authToken(), currentGameID);
 
             return "Successfully watching game #" + params[0];
 
@@ -198,6 +247,20 @@ public class ChessClient {
             {"help", "with possible commands"} // implemented
     };
 
+    String[][] playingCommands = {
+            {"redraw", "redraw chess board"},
+            {"leave", "leave the game"},
+            {"move <coords>", "make a move"},
+            {"resign", "resign from the game"},
+            {"highlight", "highlight legal moves"},
+            {"help", "with possible commands"}
+    };
+
+    String[][] observingCommands = {
+            {"leave", "leave the game"},
+            {"help", "with possible commands"}
+    };
+
     private String generateHelpMenu(String[][] commands) {
         StringBuilder sb = new StringBuilder();
 
@@ -218,11 +281,13 @@ public class ChessClient {
 
 
     private String help() {
-        if (state == State.LOGGED_OUT) {
-            return generateHelpMenu(loggedOutCommands);
-        }
 
-        return generateHelpMenu(loggedInCommands);
+        return switch (state) {
+            case LOGGED_OUT -> generateHelpMenu(loggedOutCommands);
+            case LOGGED_IN -> generateHelpMenu(loggedInCommands);
+            case PLAYING -> generateHelpMenu(playingCommands);
+            case OBSERVING -> generateHelpMenu(observingCommands);
+        };
     }
 
     private String formatError(String error) {

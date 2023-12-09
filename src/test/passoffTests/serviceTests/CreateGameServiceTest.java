@@ -31,7 +31,9 @@ public class CreateGameServiceTest {
 
         int gameID = CreateGameService.create(auth.authToken(), "New Game");
 
-        new GameDAO().findById(gameID);
+        var dao = new GameDAO();
+        dao.findById(gameID);
+        dao.close();
 
         Assertions.assertEquals(gameID, 1);
 

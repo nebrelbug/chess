@@ -21,7 +21,9 @@ public class RegisterServiceTest {
 
         Assertions.assertEquals(token.username(), username);
 
-        new UserDAO().usernameExists(username);
+        var dao = new UserDAO();
+        dao.usernameExists(username);
+        dao.close();
     }
 
     @Test

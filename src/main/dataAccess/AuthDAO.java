@@ -95,4 +95,8 @@ public class AuthDAO {
             throw new ResponseException(500, e.toString());
         }
     }
+
+    public void close() throws ResponseException {
+        new Database().closeConnection(this.conn);
+    }
 }

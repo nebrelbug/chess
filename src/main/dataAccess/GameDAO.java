@@ -161,4 +161,8 @@ public class GameDAO {
             throw new ResponseException(500, "Error resetting games index");
         }
     }
+
+    public void close() throws ResponseException {
+        new Database().closeConnection(this.conn);
+    }
 }

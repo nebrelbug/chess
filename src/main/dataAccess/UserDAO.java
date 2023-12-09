@@ -79,4 +79,8 @@ public class UserDAO {
             throw new ResponseException(500, "System error: failed to clear database");
         }
     }
+
+    public void close() throws ResponseException {
+        new Database().closeConnection(this.conn);
+    }
 }

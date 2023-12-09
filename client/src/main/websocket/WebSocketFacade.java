@@ -1,5 +1,7 @@
 package websocket;
 
+import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import exceptions.ResponseException;
 import webSocketMessages.serverMessages.ServerMessage;
@@ -13,7 +15,7 @@ import java.net.URISyntaxException;
 import static webSocketMessages.userCommands.UserGameCommand.CommandType.*;
 
 //need to extend Endpoint for websocket to work properly
-public class WebSocketFacade extends Endpoint {
+public class WebSocketFacade extends Endpoint implements AutoCloseable {
 
     Session session;
     NotificationHandler notificationHandler;
@@ -33,6 +35,7 @@ public class WebSocketFacade extends Endpoint {
                 public void onMessage(String message) {
                     ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
                     notificationHandler.notify(notification);
+
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
@@ -46,33 +49,45 @@ public class WebSocketFacade extends Endpoint {
     }
 
 
-    private void sendCommand(String authToken, UserGameCommand.CommandType commandType, String data) throws ResponseException {
+    private void sendCommand(String authToken, UserGameCommand.CommandType commandType, int gameID, ChessGame.TeamColor color, ChessMove move) throws ResponseException {
         try {
-            var action = new UserGameCommand(authToken, commandType, data);
+            var action = new UserGameCommand(authToken, commandType, gameID, color, move);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new ResponseException(500, ex.getMessage());
         }
     }
 
-    public void joinPlayer(String authToken, String color) throws ResponseException {
-        sendCommand(authToken, JOIN_PLAYER, color);
+    public void joinPlayer(String authToken, int gameId, ChessGame.TeamColor color) throws ResponseException {
+        sendCommand(authToken, JOIN_PLAYER, gameId, color, null);
     }
 
-    public void joinObserver(String authToken) throws ResponseException {
-        sendCommand(authToken, JOIN_OBSERVER, null);
+    public void joinObserver(String authToken, int gameId) throws ResponseException {
+        sendCommand(authToken, JOIN_OBSERVER, gameId, null, null);
     }
 
-    public void makeMove(String authToken, String move) throws ResponseException {
-        sendCommand(authToken, MAKE_MOVE, move);
+    public void makeMove(String authToken, int gameId, ChessMove move) throws ResponseException {
+        sendCommand(authToken, MAKE_MOVE, gameId, null, move);
     }
 
-    public void leave(String authToken) throws ResponseException {
-        sendCommand(authToken, LEAVE, null);
+    public void leave(String authToken, int gameId) throws ResponseException {
+        sendCommand(authToken, LEAVE, gameId, null, null);
     }
 
-    public void resign(String authToken) throws ResponseException {
-        sendCommand(authToken, RESIGN, null);
+    public void resign(String authToken, int gameId) throws ResponseException {
+        sendCommand(authToken, RESIGN, gameId, null, null);
+    }
+
+    @Override
+    public void close() throws ResponseException {
+        try {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        } catch (IOException e) {
+            // Handle or log the IOException during close
+            throw new ResponseException(400, "UH OH SOMETHING BAD");
+        }
     }
 
 }

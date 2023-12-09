@@ -35,6 +35,7 @@ public class Repl implements NotificationHandler {
     }
 
     public void notify(ServerMessage notification) {
+        System.out.println("I got called");
         System.out.println(SET_TEXT_COLOR_RED + notification.getServerMessageType());
     }
 

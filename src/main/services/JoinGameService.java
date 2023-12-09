@@ -21,6 +21,8 @@ public class JoinGameService {
 
         AuthToken token = new AuthDAO().getByTokenString(tokenString); // this will throw if invalid token
 
-        new GameDAO().claimSpot(gameID, token.username(), playerColor);
+        var dao = new GameDAO();
+        dao.claimSpot(gameID, token.username(), playerColor);
+        dao.close();
     }
 }

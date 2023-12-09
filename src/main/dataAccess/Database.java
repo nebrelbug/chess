@@ -47,4 +47,20 @@ public class Database {
         }
     }
 
+    /**
+     * Closes the specified connection.
+     *
+     * @param connection the connection to be closed.
+     * @throws ResponseException if a data access error occurs while closing the connection.
+     */
+    public void closeConnection(Connection connection) throws ResponseException {
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                throw new ResponseException(500, e.getMessage());
+            }
+        }
+    }
+
 }

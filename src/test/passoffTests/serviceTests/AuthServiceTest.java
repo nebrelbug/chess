@@ -44,10 +44,13 @@ public class AuthServiceTest {
     public void logoutPositiveTest() throws ResponseException {
 
         new AuthService().logout(auth.authToken());
+        var dao = new AuthDAO();
 
         Assertions.assertThrows(ResponseException.class, () -> {
-            new AuthDAO().getByTokenString(auth.authToken());
+            dao.getByTokenString(auth.authToken());
         });
+
+        dao.close();
     }
 
 

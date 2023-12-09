@@ -9,8 +9,16 @@ import exceptions.ResponseException;
 public class ClearDbService {
 
     public static void clear() throws ResponseException {
-        new AuthDAO().clear();
-        new GameDAO().clear();
-        new UserDAO().clear();
+        var authDao = new AuthDAO();
+        var gameDao = new GameDAO();
+        var userDao = new UserDAO();
+
+        authDao.clear();
+        gameDao.clear();
+        userDao.clear();
+
+        authDao.close();
+        gameDao.close();
+        userDao.close();
     }
 }

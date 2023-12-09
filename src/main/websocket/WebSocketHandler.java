@@ -1,10 +1,14 @@
 package websocket;
 
+import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import dataAccess.AuthDAO;
+import dataAccess.DataAccessException;
 import exceptions.ResponseException;
 import models.AuthToken;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
@@ -19,17 +23,25 @@ public class WebSocketHandler {
     private final ConnectionManager connections = new ConnectionManager();
 
     @OnWebSocketMessage
-    public void onMessage(Session session, String message) throws IOException, ResponseException {
+    public void onMessage(Session session, String message) throws IOException, ResponseException, DataAccessException {
         UserGameCommand userCommand = new Gson().fromJson(message, UserGameCommand.class);
-        var authToken = new AuthDAO().getByTokenString(
+
+        var dao = new AuthDAO();
+
+        var authToken = dao.getByTokenString(
                 userCommand.getAuthString()
         );
-        String data = userCommand.getData();
 
-        System.out.println("GOT HERE");
+        dao.close();
+
+        int gameId = userCommand.getGameID();
+        ChessMove move = userCommand.getMove();
+        ChessGame.TeamColor color = userCommand.getColor();
+
+        System.out.println("Received user game command");
 
         switch (userCommand.getCommandType()) {
-            case JOIN_PLAYER -> joinPlayer(authToken, session, data);
+            case JOIN_PLAYER -> joinPlayer(authToken, session, color);
             case JOIN_OBSERVER -> joinObserver(authToken, session);
             case MAKE_MOVE -> makeMove(authToken, session);
             case LEAVE -> leave(authToken, session);
@@ -37,7 +49,12 @@ public class WebSocketHandler {
         }
     }
 
-    private void joinPlayer(AuthToken authToken, Session session, String color) throws IOException {
+    @OnWebSocketError
+    public void onError(Session session, Throwable throwable) {
+        System.err.println(throwable);
+    }
+
+    private void joinPlayer(AuthToken authToken, Session session, ChessGame.TeamColor color) throws IOException {
         connections.add(authToken.username(), session);
 
         connections.singleBroadcast(authToken.username(), new ServerMessage(
@@ -46,7 +63,7 @@ public class WebSocketHandler {
 
         var notification = new ServerMessage(
                 ServerMessage.ServerMessageType.NOTIFICATION,
-                String.format("%s is joining as %s", authToken.username(), color)
+                String.format("%s is joining as %s", authToken.username(), color.toString())
         );
         connections.broadcastExcluding(authToken.username(), notification);
     }

@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import exceptions.ResponseException;
 
 import com.google.gson.Gson;
@@ -33,7 +34,7 @@ public class ServerFacade {
     record gameList(ArrayList<Game> games) {
     }
 
-    record joinGameRequest(String playerColor, int gameID) {
+    record joinGameRequest(ChessGame.TeamColor playerColor, int gameID) {
     }
 
     public AuthToken login(String username, String password) throws ResponseException {
@@ -75,10 +76,8 @@ public class ServerFacade {
                 gameList.class).games;
     }
 
-    public void join(String tokenString, int gameId, String color) throws ResponseException {
+    public void join(String tokenString, int gameId, ChessGame.TeamColor color) throws ResponseException {
         var path = "/game";
-
-        if (color != null) color = color.toUpperCase();
 
         this.makeRequest("PUT",
                 path,

@@ -97,7 +97,7 @@ public class BenChessBoard implements ChessBoard {
 
     @Override
     public String toString() {
-        return ui.BoardDisplay.display(this, ChessGame.TeamColor.WHITE);
+        return ui.BoardDisplay.display(this, ChessGame.TeamColor.WHITE, null);
     }
 
     @Override

@@ -68,7 +68,7 @@ public class ServerFacade {
 
     public ArrayList<Game> list(String tokenString) throws ResponseException {
         var path = "/game";
-
+        
         return this.makeRequest("GET",
                 path,
                 null,

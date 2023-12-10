@@ -31,6 +31,7 @@ public class DatabaseInit {
                         id INT NOT NULL AUTO_INCREMENT,
                         white_username VARCHAR(255),
                         black_username VARCHAR(255),
+                        status VARCHAR(255) NOT NULL,
                         name VARCHAR(255) NOT NULL,
                         board_state longtext NOT NULL,
                         PRIMARY KEY (id)

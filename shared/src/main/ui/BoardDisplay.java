@@ -1,11 +1,10 @@
 package ui;
 
-import chess.BenChessPosition;
-import chess.ChessBoard;
-import chess.ChessGame;
+import chess.*;
 import models.Game;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,13 +12,18 @@ import static ui.EscapeSequences.*;
 
 public class BoardDisplay {
 
-    public static String display(Game game, ChessGame.TeamColor perspective) {
+    public static String display(Game game, ChessGame.TeamColor perspective, ChessPosition pos) {
         var board = game.game().getBoard();
 
-        return display(board, perspective);
+        return display(board, perspective, pos);
     }
 
-    public static String display(ChessBoard board, ChessGame.TeamColor perspective) {
+    public static String display(ChessBoard board, ChessGame.TeamColor perspective, ChessPosition pos) {
+
+        var game = new BenChessGame();
+        game.setBoard(board);
+
+        var validMoves = pos == null ? List.of() : game.validMoves(pos);
 
         StringBuilder sb = new StringBuilder();
 
@@ -51,7 +55,10 @@ public class BoardDisplay {
 
             for (int col : cols) {
 
-                var piece = board.getPiece(new BenChessPosition(row, col));
+                var thisPosition = new BenChessPosition(row, col);
+                var thisMove = new BenChessMove(pos, thisPosition, null);
+
+                var piece = board.getPiece(thisPosition);
 
                 String pieceString = " ";
 
@@ -65,11 +72,13 @@ public class BoardDisplay {
                     } else {
                         pieceString = SET_TEXT_COLOR_WHITE + pieceString + RESET_TEXT_COLOR;
                     }
-
                 }
 
+                boolean isHighlighted = !validMoves.isEmpty() && validMoves.contains(thisMove);
 
-                var squareBackground = (row + col) % 2 == 0 ? SET_BG_COLOR_DARK_GREEN : SET_BG_COLOR_GREEN;
+                String squareBackground = isHighlighted ?
+                        ((row + col) % 2 == 0 ? SET_BG_COLOR_DARK_BLUE : SET_BG_COLOR_BLUE) :
+                        ((row + col) % 2 == 0 ? SET_BG_COLOR_DARK_GREEN : SET_BG_COLOR_GREEN);
 
                 sb.append(squareBackground)
                         .append(" ")

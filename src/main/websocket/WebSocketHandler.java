@@ -52,8 +52,6 @@ public class WebSocketHandler {
         ChessMove move = userCommand.getMove();
         ChessGame.TeamColor color = userCommand.getPlayerColor();
 
-        System.out.println("Received user game command");
-
         switch (userCommand.getCommandType()) {
             case JOIN_PLAYER -> joinPlayer(authToken, session, gameId, color);
             case JOIN_OBSERVER -> joinObserver(authToken, session, gameId);
@@ -92,6 +90,7 @@ public class WebSocketHandler {
 
     private void joinPlayer(AuthToken authToken, Session session, int gameId, ChessGame.TeamColor color) throws IOException {
         String username = authToken.username();
+        connections.remove(username); // just in case
 
         try {
             if (color != WHITE && color != BLACK) {
@@ -127,6 +126,7 @@ public class WebSocketHandler {
 
     private void joinObserver(AuthToken authToken, Session session, int gameId) throws IOException {
         String username = authToken.username();
+        connections.remove(username); // just in case
 
         try {
             Game game = gameDao.findById(gameId);
@@ -173,13 +173,28 @@ public class WebSocketHandler {
 
     private void resign(AuthToken authToken, Session session, int gameId) throws IOException {
         String username = authToken.username();
-        connections.remove(authToken.username());
 
-        broadcastNotification(
-                "",
-                String.format("%s has resigned", username),
-                gameId
-        );
+        var currentConn = connections.get(username);
+
+        try {
+            if (currentConn == null || currentConn.gameId != gameId) {
+                throw new ResponseException(500, "can't resign from a game you're not participating in");
+            }
+
+            gameDao.updateStatus(gameId, Game.Status.OVER);
+
+            broadcastNotification(
+                    username,
+                    String.format("%s has resigned", username),
+                    gameId
+            );
+
+        } catch (ResponseException e) {
+            respondWithError(session, "invalid game ID");
+        }
+
+
+        connections.remove(username); // just in case
     }
 
 }

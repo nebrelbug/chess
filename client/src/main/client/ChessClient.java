@@ -3,7 +3,9 @@ package client;
 import java.util.Arrays;
 import java.util.Objects;
 
+import chess.BenChessPosition;
 import chess.ChessGame;
+import chess.ChessPosition;
 import exceptions.ResponseException;
 import models.AuthToken;
 import models.Deserializer;
@@ -63,6 +65,7 @@ public class ChessClient implements NotificationHandler {
                 case "redraw" -> redraw();
                 case "leave" -> leave();
                 case "resign" -> resign();
+                case "highlight" -> highlight(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -129,6 +132,10 @@ public class ChessClient implements NotificationHandler {
                         .append(game.gameID())
                         .append(")");
 
+                if (game.status() == Game.Status.OVER) {
+                    sb.append(SET_TEXT_COLOR_YELLOW + " [OVER]" + SET_TEXT_COLOR_BLUE);
+                }
+
                 String whiteUsername = game.whiteUsername() != null ? game.whiteUsername() : "nobody yet";
                 String blackUsername = game.blackUsername() != null ? game.blackUsername() : "nobody yet";
 
@@ -170,7 +177,7 @@ public class ChessClient implements NotificationHandler {
         try {
             var game = Deserializer.parse(gameString, Game.class);
 
-            System.out.println(BoardDisplay.display(game, currentTeamColor));
+            System.out.println(BoardDisplay.display(game, currentTeamColor, null));
 
         } catch (ResponseException e) {
             System.out.println(formatError("Error displaying board: " + e.getMessage()));
@@ -274,6 +281,15 @@ public class ChessClient implements NotificationHandler {
         return "Resigning from game...";
     }
 
+    private String highlight(String[] params) throws ResponseException {
+        assertSignedIn();
+
+        ChessPosition pos = BenChessPosition.fromString(params[0]);
+
+        Game game = server.getGame(authToken.authToken(), currentGameID);
+        return BoardDisplay.display(game, currentTeamColor, pos);
+    }
+
     String[][] loggedOutCommands = {
             {"register <USERNAME> <PASSWORD> <EMAIL>", "to create an account"}, // implemented
             {"login <USERNAME> <PASSWORD>", "to play chess"}, // implemented
@@ -286,7 +302,6 @@ public class ChessClient implements NotificationHandler {
             {"list", "games"}, // implemented
             {"join <ID> [WHITE|BLACK|<empty>]", "a game"}, // implemented
             {"observe <ID>", "a game"}, // implemented
-            {"resume <ID>", "resume playing a game"},
             {"logout", "when you are done"}, // implemented
             {"quit", "playing chess"}, // implemented
             {"help", "with possible commands"} // implemented
@@ -296,8 +311,8 @@ public class ChessClient implements NotificationHandler {
             {"redraw", "redraw chess board"}, // implemented
             {"leave", "leave the game"}, // implemented
             {"move <coords>", "make a move"},
-            {"resign", "resign from the game"}, // implemented (TODO)
-            {"highlight", "highlight legal moves"},
+            {"resign", "resign from the game"}, // implemented
+            {"highlight", "highlight legal moves"}, // implemented
             {"help", "with possible commands"} // implemented
     };
 

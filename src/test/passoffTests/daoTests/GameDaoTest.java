@@ -90,7 +90,7 @@ public class GameDaoTest {
     @Test
     public void updateGameNegativeTest() {
         Assertions.assertThrows(ResponseException.class, () -> {
-            Game game = new Game(3, "a", "b", "name", new BenChessGame());
+            Game game = new Game(3, "a", "b", Game.Status.OVER, "name", new BenChessGame());
             dao.updateGame(0, Stringifier.jsonify(game.game()));
         });
     }

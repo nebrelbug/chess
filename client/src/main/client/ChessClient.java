@@ -6,6 +6,9 @@ import java.util.Objects;
 import chess.ChessGame;
 import exceptions.ResponseException;
 import models.AuthToken;
+import models.Deserializer;
+import models.Game;
+import response.Stringifier;
 import server.ServerFacade;
 import ui.BoardDisplay;
 import webSocketMessages.serverMessages.ServerMessage;
@@ -14,7 +17,7 @@ import websocket.WebSocketFacade;
 
 import static ui.EscapeSequences.*;
 
-public class ChessClient {
+public class ChessClient implements NotificationHandler {
     private final ServerFacade server;
     private final WebSocketFacade ws;
     private State state = State.LOGGED_OUT;
@@ -22,12 +25,10 @@ public class ChessClient {
     private ChessGame.TeamColor currentTeamColor = null;
     private AuthToken authToken = null;
 
-    public ChessClient(String serverUrl, NotificationHandler notificationHandler) throws ResponseException {
+    public ChessClient(String serverUrl) throws ResponseException {
         server = new server.ServerFacade(serverUrl);
 
-//        notificationHandler.notify(new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, "TEXT NOTIFICATION"));
-
-        ws = new WebSocketFacade(serverUrl, notificationHandler);
+        ws = new WebSocketFacade(serverUrl, this);
     }
 
     private void setGameID(int gameID) {
@@ -59,6 +60,9 @@ public class ChessClient {
                 case "logout" -> logout();
                 case "join" -> join(params);
                 case "observe" -> observe(params);
+                case "redraw" -> redraw();
+                case "leave" -> leave();
+                case "resign" -> resign();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -161,12 +165,28 @@ public class ChessClient {
         return teamColor;
     }
 
-    private void displayBoard() throws ResponseException {
-        var game = server.getGame(authToken.authToken(), currentGameID);
+    private void displayBoard(String gameString) {
 
-        switch (currentTeamColor) {
-            case WHITE -> System.out.println(BoardDisplay.display(game, false));
-            case BLACK -> System.out.println(BoardDisplay.display(game, true));
+        try {
+            var game = Deserializer.parse(gameString, Game.class);
+
+            System.out.println(BoardDisplay.display(game, currentTeamColor));
+
+        } catch (ResponseException e) {
+            System.out.println(formatError("Error displaying board: " + e.getMessage()));
+        }
+    }
+
+    private String redraw() {
+        try {
+            if (!(currentGameID > 0)) throw new ResponseException(500, "you're not currently participating in a game");
+
+            var game = server.getGame(authToken.authToken(), currentGameID);
+
+            displayBoard(Stringifier.jsonify(game));
+            return "";
+        } catch (ResponseException e) {
+            return formatError("Error: " + e.getMessage());
         }
     }
 
@@ -183,6 +203,7 @@ public class ChessClient {
 
             setGameID(targetGameId);
             setCurrentTeamColor(targetColor);
+            state = State.PLAYING;
 
             ws.joinPlayer(authToken.authToken(), currentGameID, targetColor); // this will trigger displayBoard
 
@@ -201,9 +222,9 @@ public class ChessClient {
 
             server.join(authToken.authToken(), targetGameId, null);
 
-            var game = server.getGame(authToken.authToken(), targetGameId);
-
-            System.out.println(BoardDisplay.display(game, false));
+            setGameID(targetGameId);
+            setCurrentTeamColor(null); // just in case
+            state = State.OBSERVING;
 
             ws.joinObserver(authToken.authToken(), currentGameID);
 
@@ -229,6 +250,29 @@ public class ChessClient {
         }
     }
 
+    private String leave() throws ResponseException {
+        assertSignedIn();
+
+        ws.leave(authToken.authToken(), currentGameID);
+
+        state = State.LOGGED_IN;
+        resetGameID();
+        resetCurrentTeamColor();
+
+        return "Leaving game...";
+    }
+
+    private String resign() throws ResponseException {
+        assertSignedIn();
+
+        ws.resign(authToken.authToken(), currentGameID);
+
+        state = State.LOGGED_IN;
+        resetGameID();
+        resetCurrentTeamColor();
+
+        return "Resigning from game...";
+    }
 
     String[][] loggedOutCommands = {
             {"register <USERNAME> <PASSWORD> <EMAIL>", "to create an account"}, // implemented
@@ -240,25 +284,26 @@ public class ChessClient {
     String[][] loggedInCommands = {
             {"create <NAME>", "a game"}, // implement
             {"list", "games"}, // implemented
-            {"join <ID> [WHITE|BLACK|<empty>]", "a game"}, // implemented // TODO show board
-            {"observe <ID>", "a game"}, // implemented // TODO show board
+            {"join <ID> [WHITE|BLACK|<empty>]", "a game"}, // implemented
+            {"observe <ID>", "a game"}, // implemented
+            {"resume <ID>", "resume playing a game"},
             {"logout", "when you are done"}, // implemented
             {"quit", "playing chess"}, // implemented
             {"help", "with possible commands"} // implemented
     };
 
     String[][] playingCommands = {
-            {"redraw", "redraw chess board"},
-            {"leave", "leave the game"},
+            {"redraw", "redraw chess board"}, // implemented
+            {"leave", "leave the game"}, // implemented
             {"move <coords>", "make a move"},
-            {"resign", "resign from the game"},
+            {"resign", "resign from the game"}, // implemented (TODO)
             {"highlight", "highlight legal moves"},
-            {"help", "with possible commands"}
+            {"help", "with possible commands"} // implemented
     };
 
     String[][] observingCommands = {
-            {"leave", "leave the game"},
-            {"help", "with possible commands"}
+            {"leave", "leave the game"}, // implemented
+            {"help", "with possible commands"} // implemented
     };
 
     private String generateHelpMenu(String[][] commands) {
@@ -278,7 +323,6 @@ public class ChessClient {
 
         return sb.toString();
     }
-
 
     private String help() {
 
@@ -302,5 +346,16 @@ public class ChessClient {
         if (state == State.LOGGED_OUT) {
             throw new ResponseException(400, "You must sign in");
         }
+    }
+
+    public void notify(ServerMessage notification) {
+        System.out.println("\n");
+        switch (notification.getServerMessageType()) {
+            case LOAD_GAME -> displayBoard(notification.getGame());
+            case ERROR -> System.out.println(SET_TEXT_COLOR_RED + notification.getErrorMessage());
+            case NOTIFICATION -> System.out.println(SET_TEXT_COLOR_BLUE + notification.getMessage());
+            default -> System.out.println("ERROR");
+        }
+        System.out.print(inputPrompt());
     }
 }

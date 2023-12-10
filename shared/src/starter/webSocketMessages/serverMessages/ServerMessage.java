@@ -18,10 +18,14 @@ public class ServerMessage {
     }
 
     private final String message;
+    private final String errorMessage;
+    private final String game;
 
-    public ServerMessage(ServerMessageType type, String message) {
+    public ServerMessage(ServerMessageType type, String message, String errorMessage, String game) {
         this.serverMessageType = type;
         this.message = message;
+        this.errorMessage = errorMessage;
+        this.game = game;
     }
 
     public ServerMessageType getServerMessageType() {
@@ -32,13 +36,20 @@ public class ServerMessage {
         return message;
     }
 
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public String getGame() {
+        return game;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (!(o instanceof ServerMessage))
+        if (!(o instanceof ServerMessage that))
             return false;
-        ServerMessage that = (ServerMessage) o;
         return getServerMessageType() == that.getServerMessageType();
     }
 

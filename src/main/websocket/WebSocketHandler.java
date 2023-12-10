@@ -2,116 +2,184 @@ package websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
-import com.google.gson.Gson;
 import dataAccess.AuthDAO;
-import dataAccess.DataAccessException;
+import dataAccess.GameDAO;
 import exceptions.ResponseException;
 import models.AuthToken;
+import models.Deserializer;
+import models.Game;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
 import java.io.IOException;
+import java.util.Objects;
 
+import response.Stringifier;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.UserGameCommand;
+
+import static chess.ChessGame.TeamColor.BLACK;
+import static chess.ChessGame.TeamColor.WHITE;
 
 @WebSocket
 public class WebSocketHandler {
 
     private final ConnectionManager connections = new ConnectionManager();
+    private final AuthDAO authDao = new AuthDAO();
+    private final GameDAO gameDao = new GameDAO();
+
+    public WebSocketHandler() throws ResponseException {
+    }
 
     @OnWebSocketMessage
-    public void onMessage(Session session, String message) throws IOException, ResponseException, DataAccessException {
-        UserGameCommand userCommand = new Gson().fromJson(message, UserGameCommand.class);
+    public void onMessage(Session session, String message) throws IOException, ResponseException {
+        UserGameCommand userCommand = Deserializer.parse(message, UserGameCommand.class);
 
-        var dao = new AuthDAO();
+        AuthToken authToken;
 
-        var authToken = dao.getByTokenString(
-                userCommand.getAuthString()
-        );
-
-        dao.close();
+        try {
+            authToken = authDao.getByTokenString(
+                    userCommand.getAuthString()
+            );
+        } catch (ResponseException e) {
+            respondWithError(session, "invalid auth token");
+            return;
+        }
 
         int gameId = userCommand.getGameID();
         ChessMove move = userCommand.getMove();
-        ChessGame.TeamColor color = userCommand.getColor();
+        ChessGame.TeamColor color = userCommand.getPlayerColor();
 
         System.out.println("Received user game command");
 
         switch (userCommand.getCommandType()) {
-            case JOIN_PLAYER -> joinPlayer(authToken, session, color);
-            case JOIN_OBSERVER -> joinObserver(authToken, session);
-            case MAKE_MOVE -> makeMove(authToken, session);
-            case LEAVE -> leave(authToken, session);
-            case RESIGN -> resign(authToken, session);
+            case JOIN_PLAYER -> joinPlayer(authToken, session, gameId, color);
+            case JOIN_OBSERVER -> joinObserver(authToken, session, gameId);
+            case MAKE_MOVE -> makeMove(authToken, session, gameId);
+            case LEAVE -> leave(authToken, session, gameId);
+            case RESIGN -> resign(authToken, session, gameId);
         }
     }
 
     @OnWebSocketError
-    public void onError(Session session, Throwable throwable) {
-        System.err.println(throwable);
+    public void onError(Session _session, Throwable throwable) {
+        throwable.printStackTrace();
     }
 
-    private void joinPlayer(AuthToken authToken, Session session, ChessGame.TeamColor color) throws IOException {
-        connections.add(authToken.username(), session);
+    private void respondWithError(Session session, String errorMessage) throws IOException {
+        session.getRemote().sendString(Stringifier.jsonify(
+                new ServerMessage(
+                        ServerMessage.ServerMessageType.ERROR, null, "Error: " + errorMessage, null)
+        ));
+    }
 
-        connections.singleBroadcast(authToken.username(), new ServerMessage(
-                ServerMessage.ServerMessageType.LOAD_GAME, null)
+    private void broadcastLoadGame(String username, String serializedGame) throws IOException {
+        connections.singleBroadcast(username, new ServerMessage(
+                ServerMessage.ServerMessageType.LOAD_GAME, null, null, serializedGame)
         );
+    }
 
+    private void broadcastNotification(String excludeUsername, String message, int gameId) throws IOException {
         var notification = new ServerMessage(
                 ServerMessage.ServerMessageType.NOTIFICATION,
-                String.format("%s is joining as %s", authToken.username(), color.toString())
+                message,
+                null, null
         );
-        connections.broadcastExcluding(authToken.username(), notification);
+        connections.broadcastExcluding(excludeUsername, notification, gameId);
     }
 
-    private void joinObserver(AuthToken authToken, Session session) throws IOException {
-        connections.add(authToken.username(), session);
+    private void joinPlayer(AuthToken authToken, Session session, int gameId, ChessGame.TeamColor color) throws IOException {
+        String username = authToken.username();
 
-        connections.singleBroadcast(authToken.username(), new ServerMessage(
-                ServerMessage.ServerMessageType.LOAD_GAME, null)
-        );
+        try {
+            if (color != WHITE && color != BLACK) {
+                throw new ResponseException(500, "invalid player color");
+            }
 
-        var notification = new ServerMessage(
-                ServerMessage.ServerMessageType.NOTIFICATION,
-                String.format("%s started watching the game", authToken.username())
-        );
-        connections.broadcastExcluding(authToken.username(), notification);
+            Game game = gameDao.findById(gameId);
+
+            if ((color == WHITE && game.whiteUsername() == null) ||
+                    (color == BLACK && game.blackUsername() == null)) {
+                throw new ResponseException(500, "team not joined");
+            }
+
+            if (
+                    (color == WHITE && !Objects.equals(game.whiteUsername(), username) ||
+                            (color == BLACK && !Objects.equals(game.blackUsername(), username)))) {
+                throw new ResponseException(500, "wrong team");
+            }
+
+            connections.add(username, session, gameId);
+
+            broadcastLoadGame(username, Stringifier.jsonify(game));
+            broadcastNotification(
+                    username,
+                    String.format("%s is joining as %s", username, color),
+                    gameId
+            );
+
+        } catch (ResponseException e) {
+            respondWithError(session, e.getMessage());
+        }
     }
 
-    private void makeMove(AuthToken authToken, Session session) throws IOException {
-        connections.add(authToken.username(), session);
+    private void joinObserver(AuthToken authToken, Session session, int gameId) throws IOException {
+        String username = authToken.username();
+
+        try {
+            Game game = gameDao.findById(gameId);
+
+            connections.add(username, session, gameId);
+
+            broadcastLoadGame(username, Stringifier.jsonify(game));
+            broadcastNotification(
+                    username,
+                    String.format("%s started watching the game", username),
+                    gameId
+            );
+        } catch (ResponseException e) {
+            respondWithError(session, "invalid game ID");
+        }
+    }
+
+    private void makeMove(AuthToken authToken, Session session, int gameId) throws IOException {
+        connections.add(authToken.username(), session, gameId);
         var message = String.format("%s is in the shop", authToken);
 //        var notification = new ServerMessage(ServerMessage.Type.ARRIVAL, message);
 //        connections.broadcast(authToken.username(), notification);
     }
 
 
-    private void leave(AuthToken authToken, Session session) throws IOException {
-        connections.remove(authToken.username());
+    private void leave(AuthToken authToken, Session session, int gameId) throws IOException {
+        String username = authToken.username();
 
-        var notification = new ServerMessage(
-                ServerMessage.ServerMessageType.NOTIFICATION,
-                String.format("%s left the game for now", authToken.username())
-        );
+        var currentConn = connections.get(username);
 
-        connections.broadcastExcluding("", notification);
+        if (currentConn == null || currentConn.gameId != gameId) {
+            respondWithError(session, "can't leave a game you're not participating in");
+        } else {
+            broadcastNotification(
+                    username,
+                    String.format("%s left the game for now", username),
+                    gameId
+            );
+        }
 
+        connections.remove(username); // just in case
     }
 
 
-    private void resign(AuthToken authToken, Session session) throws IOException {
+    private void resign(AuthToken authToken, Session session, int gameId) throws IOException {
+        String username = authToken.username();
         connections.remove(authToken.username());
 
-        var notification = new ServerMessage(
-                ServerMessage.ServerMessageType.NOTIFICATION,
-                String.format("%s left the game for now", authToken.username())
+        broadcastNotification(
+                "",
+                String.format("%s has resigned", username),
+                gameId
         );
-
-        connections.broadcastExcluding("", notification);
     }
 
 }

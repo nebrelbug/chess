@@ -13,13 +13,13 @@ import static ui.EscapeSequences.*;
 
 public class BoardDisplay {
 
-    public static String display(Game game, boolean blackPerspective) {
+    public static String display(Game game, ChessGame.TeamColor perspective) {
         var board = game.game().getBoard();
 
-        return display(board, blackPerspective);
+        return display(board, perspective);
     }
 
-    public static String display(ChessBoard board, boolean blackPerspective) {
+    public static String display(ChessBoard board, ChessGame.TeamColor perspective) {
 
         StringBuilder sb = new StringBuilder();
 
@@ -28,7 +28,7 @@ public class BoardDisplay {
         List<String> colNames = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h");
 
 
-        if (blackPerspective) {
+        if (perspective == ChessGame.TeamColor.BLACK) {
             Collections.reverse(rows);
             Collections.reverse(cols);
             Collections.reverse(colNames);

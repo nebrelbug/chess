@@ -25,15 +25,15 @@ public class UserGameCommand {
     private final CommandType commandType;
     private final String authToken;
     private final int gameID;
-    private final ChessGame.TeamColor color;
+    private final ChessGame.TeamColor playerColor;
     private final ChessMove move;
 
 
-    public UserGameCommand(String authToken, CommandType commandType, int gameID, ChessGame.TeamColor color, ChessMove move) {
+    public UserGameCommand(String authToken, CommandType commandType, int gameID, ChessGame.TeamColor playerColor, ChessMove move) {
         this.authToken = authToken;
         this.commandType = commandType;
         this.gameID = gameID;
-        this.color = color;
+        this.playerColor = playerColor;
         this.move = move;
     }
 
@@ -53,8 +53,8 @@ public class UserGameCommand {
         return move;
     }
 
-    public ChessGame.TeamColor getColor() {
-        return color;
+    public ChessGame.TeamColor getPlayerColor() {
+        return playerColor;
     }
 
     @Override

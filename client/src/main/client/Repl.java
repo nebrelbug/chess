@@ -1,18 +1,16 @@
 package client;
 
 import exceptions.ResponseException;
-import webSocketMessages.serverMessages.ServerMessage;
-import websocket.NotificationHandler;
 
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
-public class Repl implements NotificationHandler {
+public class Repl {
     private final ChessClient client;
 
     public Repl(String serverUrl) throws ResponseException {
-        client = new ChessClient(serverUrl, this);
+        client = new ChessClient(serverUrl);
     }
 
     public void run() {
@@ -32,11 +30,6 @@ public class Repl implements NotificationHandler {
             }
         }
         System.out.println();
-    }
-
-    public void notify(ServerMessage notification) {
-        System.out.println("I got called");
-        System.out.println(SET_TEXT_COLOR_RED + notification.getServerMessageType());
     }
 
 }

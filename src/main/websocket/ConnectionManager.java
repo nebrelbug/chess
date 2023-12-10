@@ -2,6 +2,7 @@ package websocket;
 
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
+import response.Stringifier;
 import webSocketMessages.serverMessages.ServerMessage;
 
 import java.io.IOException;
@@ -11,8 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionManager {
     public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
-    public void add(String visitorName, Session session) {
-        var connection = new Connection(visitorName, session);
+    public void add(String visitorName, Session session, int gameId) {
+        var connection = new Connection(visitorName, session, gameId);
         connections.put(visitorName, connection);
     }
 
@@ -20,14 +21,18 @@ public class ConnectionManager {
         connections.remove(visitorName);
     }
 
-    public void broadcastExcluding(String excludeVisitorName, ServerMessage notification) throws IOException {
+    public Connection get(String visitorName) {
+        return connections.get(visitorName);
+    }
+
+    public void broadcastExcluding(String excludeVisitorName, ServerMessage notification, int gameId) throws IOException {
 
         String notificationString = new Gson().toJson(notification);
 
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
-                if (!c.visitorName.equals(excludeVisitorName)) {
+                if (c.gameId == gameId && !c.visitorName.equals(excludeVisitorName)) {
                     c.send(notificationString);
                     System.out.println("Broadcasting to: " + c.visitorName);
                 }
@@ -44,7 +49,7 @@ public class ConnectionManager {
 
     public void singleBroadcast(String visitorName, ServerMessage notification) throws IOException {
 
-        String notificationString = new Gson().toJson(notification);
+        String notificationString = Stringifier.jsonify(notification);
 
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {

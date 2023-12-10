@@ -1,7 +1,6 @@
 package services;
 
 import dataAccess.AuthDAO;
-import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
 import exceptions.ResponseException;
 import models.AuthToken;
@@ -19,7 +18,9 @@ public class JoinGameService {
             }
         }
 
-        AuthToken token = new AuthDAO().getByTokenString(tokenString); // this will throw if invalid token
+        var authDao = new AuthDAO();
+        AuthToken token = authDao.getByTokenString(tokenString); // this will throw if invalid token
+        authDao.close();
 
         var dao = new GameDAO();
         dao.claimSpot(gameID, token.username(), playerColor);

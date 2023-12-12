@@ -1,5 +1,7 @@
 package chess;
 
+import exceptions.ResponseException;
+
 import java.util.Objects;
 
 public class BenChessMove implements ChessMove {
@@ -12,6 +14,20 @@ public class BenChessMove implements ChessMove {
         startPosition = moveStartPosition;
         endPosition = moveEndPosition;
         promotionPiece = movePromotionPiece;
+    }
+
+    public static BenChessMove fromString(String pos) throws ResponseException {
+        if (pos == null || pos.length() != 4) {
+            throw new ResponseException(500, "failed to parse chess move");
+        }
+
+        String _mov1 = pos.substring(0, 2);
+        String _mov2 = pos.substring(2, 4);
+
+        var move1 = BenChessPosition.fromString(_mov1);
+        var move2 = BenChessPosition.fromString(_mov2);
+
+        return new BenChessMove(move1, move2, null);
     }
 
     @Override

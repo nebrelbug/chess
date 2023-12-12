@@ -1,7 +1,9 @@
 package models;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.ChessPiece;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import exceptions.ResponseException;
@@ -15,6 +17,10 @@ public class Deserializer {
                     ChessPiece.class, new PieceAdapter()
             ).registerTypeAdapter(
                     ChessGame.class, new GameAdapter()
+            ).registerTypeAdapter(
+                    ChessMove.class, new MoveAdapter()
+            ).registerTypeAdapter(
+                    ChessPosition.class, new PositionAdapter()
             );
 
     static Gson gson = builder.create();

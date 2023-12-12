@@ -4,7 +4,7 @@ import chess.*;
 
 /**
  * Used for testing your code
- * Add in code using your classes for each method for each FIXME
+ * Add in code using your classes for each method for each
  */
 public class TestFactory {
 
@@ -49,7 +49,7 @@ public class TestFactory {
         just know increasing it can make tests take longer to run.
         (On the flip side, if you've got a good computer feel free to decrease it)
          */
-        return 3000L;
+        return 100L;
     }
     //------------------------------------------------------------------------------------------------------------------
 }

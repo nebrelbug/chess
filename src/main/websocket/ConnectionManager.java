@@ -34,7 +34,7 @@ public class ConnectionManager {
             if (c.session.isOpen()) {
                 if (c.gameId == gameId && !c.visitorName.equals(excludeVisitorName)) {
                     c.send(notificationString);
-                    System.out.println("Broadcasting to: " + c.visitorName);
+//                    System.out.println("Broadcasting to: " + c.visitorName);
                 }
             } else {
                 removeList.add(c);

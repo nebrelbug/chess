@@ -1,6 +1,8 @@
 package dataAccess;
 
 import chess.BenChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import exceptions.ResponseException;
 import models.Game;
 import response.Stringifier;
@@ -135,6 +137,23 @@ public class GameDAO {
 
         // Otherwise, we're chilling!
 
+    }
+
+    public void makeMove(int gameId, ChessMove move) throws ResponseException {
+        Game game = findById(gameId); // make sure the game exists
+
+        if (game.status() == OVER) {
+            throw new ResponseException(500, "This game is over; you can't make a move");
+        }
+
+        try {
+            game.game().makeMove(move);
+
+            updateGame(gameId, Stringifier.jsonify(game.game()));
+
+        } catch (InvalidMoveException e) {
+            throw new ResponseException(500, e.getMessage());
+        }
     }
 
     public void updateGame(int gameID, String newGame) throws ResponseException {

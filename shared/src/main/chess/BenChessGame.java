@@ -55,9 +55,15 @@ public class BenChessGame implements ChessGame {
 
     @Override
     public void makeMove(ChessMove move) throws InvalidMoveException {
+
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
         ChessPiece pieceToMove = this.board.getPiece(startPosition);
+
+        if (pieceToMove == null) {
+            throw new InvalidMoveException("You don't have a piece there!");
+        }
+
         TeamColor colorMoving = pieceToMove.getTeamColor();
         ChessPiece.PieceType promotion = move.getPromotionPiece();
 
@@ -66,8 +72,11 @@ public class BenChessGame implements ChessGame {
 
         Collection<ChessMove> validMoves = this.validMoves(startPosition);
 
+        var testMove = new BenChessMove(move.getStartPosition(), move.getEndPosition(), promotion);
+        // so that validMoves.contains works regardless of the promotion piece
+
         // impossible move
-        if (!validMoves.contains(move)) throw new InvalidMoveException("Move impossible for piece type.");
+        if (!validMoves.contains(testMove)) throw new InvalidMoveException("Move impossible for piece type.");
 
         // move into check
         if (willCauseCheck(move, colorMoving)) throw new InvalidMoveException("Can't move king into check.");
@@ -160,7 +169,6 @@ public class BenChessGame implements ChessGame {
                         if (!willCauseCheck(move, teamColor)) {
                             checkmate = false;
                         }
-                        ;
                     }
                 }
             }

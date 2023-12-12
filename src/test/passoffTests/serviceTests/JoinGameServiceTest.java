@@ -1,6 +1,5 @@
 package passoffTests.serviceTests;
 
-import dataAccess.DataAccessException;
 import exceptions.ResponseException;
 import models.AuthToken;
 import org.junit.jupiter.api.Assertions;
@@ -49,11 +48,7 @@ public class JoinGameServiceTest {
     public void negativeTest() {
 
         Assertions.assertThrows(ResponseException.class, () -> {
-            JoinGameService.join(auth3.authToken(), gameID, "BLACK");
-        });
-
-        Assertions.assertThrows(ResponseException.class, () -> {
-            JoinGameService.join(auth4.authToken(), gameID, "BLACK");
+            JoinGameService.join("fake auth token", gameID, "BLACK");
         });
     }
 

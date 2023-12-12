@@ -3,9 +3,7 @@ package client;
 import java.util.Arrays;
 import java.util.Objects;
 
-import chess.BenChessPosition;
-import chess.ChessGame;
-import chess.ChessPosition;
+import chess.*;
 import exceptions.ResponseException;
 import models.AuthToken;
 import models.Deserializer;
@@ -66,6 +64,7 @@ public class ChessClient implements NotificationHandler {
                 case "leave" -> leave();
                 case "resign" -> resign();
                 case "highlight" -> highlight(params);
+                case "move" -> move(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -189,7 +188,7 @@ public class ChessClient implements NotificationHandler {
             if (!(currentGameID > 0)) throw new ResponseException(500, "you're not currently participating in a game");
 
             var game = server.getGame(authToken.authToken(), currentGameID);
-
+            
             displayBoard(Stringifier.jsonify(game));
             return "";
         } catch (ResponseException e) {
@@ -288,6 +287,15 @@ public class ChessClient implements NotificationHandler {
 
         Game game = server.getGame(authToken.authToken(), currentGameID);
         return BoardDisplay.display(game, currentTeamColor, pos);
+    }
+
+    private String move(String[] params) throws ResponseException {
+        assertSignedIn();
+
+        BenChessMove move = BenChessMove.fromString(params[0]);
+
+        ws.makeMove(authToken.authToken(), currentGameID, move);
+        return "";
     }
 
     String[][] loggedOutCommands = {
